@@ -63,9 +63,11 @@ def main() -> None:
     example = (REPO / "docs" / "example-workflow.md").read_text(encoding="utf-8")
     fence = example.split("```yaml")[1].split("```")[0]
     doc = yaml.safe_load(fence)
-    assert isinstance(doc, dict) and doc.get("jobs"), "example workflow failed to parse"
+    if not (isinstance(doc, dict) and doc.get("jobs")):
+        raise SystemExit("example workflow failed to parse or has no jobs")
     perms = doc.get("permissions")
-    assert perms == {"contents": "read"}, f"example workflow permissions: {perms}"
+    if perms != {"contents": "read"}:
+        raise SystemExit(f"example workflow permissions wrong: {perms}")
     print(f"docs/example-workflow.md embedded YAML: OK (permissions={perms})")
 
     if failures:
