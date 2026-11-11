@@ -95,8 +95,14 @@ def test_f6_fence_sizing():
 
 
 def test_f2_config_has_no_extra_paths():
-    """F2: configuration must not be able to direct tool discovery."""
-    import pydantic
+    """F2: removed config keys are ignored, not executed upon.
 
-    with __import__("pytest").raises(pydantic.ValidationError):
-        PatchLedgerConfig.model_validate({"scanning": {"extra_paths": ["/attacker"]}})
+    Unknown config keys must never break loading (forward/backward
+    compatibility) and never influence tool discovery — config is data,
+    not execution policy.
+    """
+    config = PatchLedgerConfig.model_validate(
+        {"scanning": {"extra_paths": ["/attacker"], "enabled": ["bandit"]}}
+    )
+    assert config.scanning.enabled == ["bandit"]
+    assert not hasattr(config.scanning, "extra_paths")

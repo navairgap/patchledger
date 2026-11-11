@@ -28,7 +28,7 @@ class ScanningConfig(BaseModel):
     PatchLedger to execute a binary of the attacker's choosing.
     """
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
 
     enabled: list[str] = Field(default_factory=lambda: list(DEFAULT_ENABLED_SCANNERS))
     timeout_seconds: int = Field(default=600, ge=10, le=3600)
@@ -41,7 +41,7 @@ class ScoringConfig(BaseModel):
     is recorded on the finding so scores are always explainable.
     """
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
 
     severity_base: dict[str, int] = Field(
         default_factory=lambda: {
@@ -77,7 +77,7 @@ class VerificationConfig(BaseModel):
     carries tuning that cannot weaken the guarantee.
     """
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
 
     treat_version_change_as_caveat: bool = True
 
@@ -89,7 +89,7 @@ class ImportConfig(BaseModel):
     silently hides findings.
     """
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
 
     max_report_size_mb: int = Field(default=50, ge=1, le=2048)
     disabled_rules: list[str] = Field(default_factory=list)
@@ -98,7 +98,7 @@ class ImportConfig(BaseModel):
 class PatchLedgerConfig(BaseModel):
     """Full project configuration."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
 
     schema_version: int = CONFIG_SCHEMA_VERSION
     scanning: ScanningConfig = Field(default_factory=ScanningConfig)

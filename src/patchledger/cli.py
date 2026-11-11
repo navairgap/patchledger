@@ -15,7 +15,6 @@ import json
 from collections.abc import Iterable
 from pathlib import Path
 
-import click
 import typer
 from rich.console import Console
 from rich.markup import escape as rich_escape
@@ -98,7 +97,7 @@ def _run(func):
             # as Rich markup (security review F10).
             err_console.print(f"[red]Error:[/red] {rich_escape(str(exc))}")
             raise typer.Exit(_EXIT_ERROR) from None
-        except (typer.Exit, click.exceptions.Exit, click.exceptions.Abort):
+        except (typer.Exit, typer.Abort):
             raise  # intentional exit codes must pass through untouched
         except Exception as exc:  # unexpected: be honest, keep it inspectable
             if _state.debug:
