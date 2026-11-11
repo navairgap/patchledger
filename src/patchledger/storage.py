@@ -465,12 +465,29 @@ class PatchLedgerDB:
         rows = self._conn.execute(
             """
             SELECT s.id AS scan_id, s.created_at AS scan_created_at, s.target_path,
-                   f.id AS finding_id, f.severity, f.status, f.scanner, f.rule_id
+                   f.id AS finding_id, f.severity, f.status, f.scanner, f.rule_id,
+                   st.version AS tool_version
             FROM findings f JOIN scans s ON s.id = f.scan_id
+            LEFT JOIN scan_tools st ON st.scan_id = s.id AND st.tool = f.scanner
             WHERE s.project_id = ? AND f.fingerprint = ?
             ORDER BY s.created_at ASC, s.id ASC
             """,
             (project_id, fingerprint),
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def project_findings(self, project_id: str) -> list[dict]:
+        """All findings joined with their scan metadata, oldest scan first."""
+        rows = self._conn.execute(
+            """
+            SELECT s.id AS scan_id, s.created_at AS scan_created_at, s.target_path,
+                   f.id AS finding_id, f.fingerprint, f.severity, f.status, f.scanner,
+                   f.rule_id, f.title, f.file_path, f.start_line, f.score
+            FROM findings f JOIN scans s ON s.id = f.scan_id
+            WHERE s.project_id = ?
+            ORDER BY s.created_at ASC, s.id ASC, f.fingerprint ASC
+            """,
+            (project_id,),
         ).fetchall()
         return [dict(row) for row in rows]
 

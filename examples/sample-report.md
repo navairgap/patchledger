@@ -4,7 +4,7 @@
 
 - **Project:** example-project (synthetic)
 - **Root:** `/home/dev/example-project`
-- **Scan:** `2c7adf87b15d43f9bb0ae33cc2f4d6ef` (scan, 2026-11-11T12:00:00+00:00)
+- **Scan:** `bb509554abf5483baaa420279116dbab` (scan, 2026-11-11T12:00:00+00:00)
 - **Git:** `0f1e2d3c4b5a` on `main`
 - **Generated:** 2026-11-11T12:05:00+00:00
 - **Overall status:** **FAIL (incomplete coverage)**

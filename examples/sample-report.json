@@ -8,7 +8,7 @@
     "root": "/home/dev/example-project"
   },
   "scan": {
-    "id": "2c7adf87b15d43f9bb0ae33cc2f4d6ef",
+    "id": "bb509554abf5483baaa420279116dbab",
     "created_at": "2026-11-11T12:00:00+00:00",
     "target_path": "/home/dev/example-project",
     "source": "scan",
@@ -99,7 +99,7 @@
   },
   "findings": [
     {
-      "id": "4b85817f7a2f45f6857b4acbc9fc1e15",
+      "id": "d755b6049ad94503be9dca4e4224b7ce",
       "fingerprint": "fp2:ff1f8e904c5964f6fbcc8a7f531344bd",
       "scanner": "pip-audit",
       "rule_id": "PYSEC-2023-62",
@@ -132,7 +132,7 @@
       ]
     },
     {
-      "id": "8f072fe456994a7cb1ba37aeac05c92c",
+      "id": "2fd668a9755d490797af5f24d91d3ae0",
       "fingerprint": "fp2:a24c59e26cf07a8d38a0d1a9fa2f9b09",
       "scanner": "bandit",
       "rule_id": "B608",
@@ -165,7 +165,7 @@
       ]
     },
     {
-      "id": "6f92075f8b094c0a97716c070f0ba001",
+      "id": "4f560c6e022d4f49ad0c4c901068709a",
       "fingerprint": "fp2:ca5e7d4632e0178190d87192beae15b5",
       "scanner": "semgrep",
       "rule_id": "python.lang.security.audit.subprocess-shell-true",
@@ -198,7 +198,7 @@
       ]
     },
     {
-      "id": "f3b6795a68c84ea6ba87050403616987",
+      "id": "e9f1994c24154517a43841804ad0921b",
       "fingerprint": "fp2:67450e9849f0608c55aa0cf0776c2a0e",
       "scanner": "gitleaks",
       "rule_id": "aws-access-token",
@@ -231,7 +231,7 @@
       ]
     },
     {
-      "id": "fff6dc51b4444c39953892b11723aee4",
+      "id": "62e8b8a80d67405cac073827dda5e16c",
       "fingerprint": "fp2:0d6e0d57aa522c8579a2d04430e076b6",
       "scanner": "semgrep",
       "rule_id": "python.lang.security.audit.hardcoded-password-string",
@@ -264,7 +264,7 @@
       ]
     },
     {
-      "id": "4f707817d58442d2b2fec67d01925857",
+      "id": "784759c7176141f0ba6cb75031ffa874",
       "fingerprint": "fp2:80b35b6c0e4d19e541cc2cf737b5c454",
       "scanner": "bandit",
       "rule_id": "B101",

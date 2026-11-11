@@ -19,7 +19,9 @@ from patchledger.normalizer import NormalizeResult, normalize_findings
 from patchledger.parsers import parse_report_file
 from patchledger.parsers.common import RawFinding
 from patchledger.scanner import ScannerOutcome, collect_git_metadata, run_all_scanners
+from patchledger.scoring import apply_scores
 from patchledger.storage import PatchLedgerDB
+from patchledger.verification import LedgerEntry, update_ledger_after_scan
 
 
 def resolve_target(target: Path) -> Path:
@@ -42,6 +44,7 @@ class ScanRunResult:
     warnings: list[str] = field(default_factory=list)
     merged_count: int = 0
     outcomes: list[ScannerOutcome] = field(default_factory=list)
+    ledger: list[LedgerEntry] = field(default_factory=list)
 
 
 def _normalize_and_merge(
@@ -49,7 +52,15 @@ def _normalize_and_merge(
 ) -> tuple[list[Finding], NormalizeResult, int]:
     normalized = normalize_findings(raw_findings, config, scan_root)
     merged, merged_count = merge_duplicates(normalized.findings)
+    apply_scores(merged, config)
     return merged, normalized, merged_count
+
+
+def _finalize(
+    db: PatchLedgerDB, project_id: str, config: PatchLedgerConfig
+) -> list[LedgerEntry]:
+    """Refresh the finding ledger and persist status transitions."""
+    return update_ledger_after_scan(db, project_id, config)
 
 
 def scan_repository(
@@ -87,6 +98,7 @@ def scan_repository(
         notes=json.dumps({"suppressed": normalized.suppressed}) if normalized.suppressed else None,
     )
     db.insert_scan(scan, findings)
+    ledger = _finalize(db, project.id, config)
     return ScanRunResult(
         scan=scan,
         findings=findings,
@@ -94,6 +106,7 @@ def scan_repository(
         warnings=normalized.warnings,
         merged_count=merged_count,
         outcomes=outcomes,
+        ledger=ledger,
     )
 
 
@@ -141,10 +154,12 @@ def import_reports(
         notes=json.dumps({"suppressed": normalized.suppressed}) if normalized.suppressed else None,
     )
     db.insert_scan(scan, findings)
+    ledger = _finalize(db, project.id, config)
     return ScanRunResult(
         scan=scan,
         findings=findings,
         suppressed=normalized.suppressed,
         warnings=all_warnings,
         merged_count=merged_count,
+        ledger=ledger,
     )
