@@ -20,6 +20,10 @@ def detect_format(data: Any) -> str:
         if isinstance(runs, list):
             return "sarif"
 
+        # pip-audit wraps its dependency list in an object with "fixes".
+        if isinstance(data.get("dependencies"), list):
+            return "pip-audit"
+
         results = data.get("results")
         if "results" in data:
             if "generated_at" in data or "metrics" in data:

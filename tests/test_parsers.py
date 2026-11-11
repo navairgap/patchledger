@@ -1,7 +1,7 @@
 """Tests for report parsers (happy paths)."""
 
 
-from conftest import fixture_path
+from conftest import fixture_path, load_fixture_json
 from patchledger.config import PatchLedgerConfig
 from patchledger.parsers import parse_report_file
 
@@ -52,6 +52,32 @@ def test_parse_pip_audit_fixture(tmp_path):
     assert f.rule_id == "PYSEC-2026-0001"
     assert f.evidence == "flask==2.3.2"
     assert f.fix and "2.3.3" in f.fix
+
+
+def test_parse_pip_audit_wrapped_object(tmp_path):
+    """pip-audit 2.x emits {"dependencies": [...], "fixes": [...]} (verified live)."""
+    from conftest import write_json
+
+    raw = load_fixture_json("pip_audit_basic.json")
+    p = write_json(tmp_path, "pip_audit_wrapped.json", {"dependencies": raw, "fixes": []})
+    result = parse_report_file(p, PatchLedgerConfig())
+    assert result.scanner == "pip-audit"
+    assert len(result.findings) == 2
+
+
+def test_pip_audit_duplicate_advisories_merge():
+    """pip-audit reports the same advisory from multiple sources; dedup merges."""
+    from patchledger.deduplication import merge_duplicates
+    from patchledger.normalizer import normalize_findings
+
+    result = parse_report_file(fixture_path("pip_audit_basic.json"), PatchLedgerConfig())
+    raws = result.findings + list(result.findings)  # simulate duplicate advisory entries
+    config = PatchLedgerConfig()
+    findings = normalize_findings(raws, config).findings
+    merged, count = merge_duplicates(findings)
+    assert len(merged) == 2
+    assert count == 2
+    assert all(len(f.occurrences) == 2 for f in merged)
 
 
 def test_parse_sarif_fixture(tmp_path):

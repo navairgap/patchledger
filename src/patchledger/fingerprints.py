@@ -5,22 +5,28 @@ from content-stable attributes only — never from line numbers or timestamps �
 so findings survive code edits above the vulnerable line, and legitimately
 disappear (new fingerprint) when the vulnerable content itself is changed.
 
-Design (version ``fp1``):
+Design (version ``fp2``):
 
     fingerprint = sha256(
         fp_version,
         scanner identity,        # "semgrep", "gitleaks", ... (not the file format)
         rule_id,
         normalized file path,    # POSIX-style; empty for dependency findings
-        normalized message       # falls back to evidence when the message is empty
+        normalized message,
+        normalized evidence      # code snippet; distinguishes same-rule
+                                 # findings with generic messages (e.g. bandit
+                                 # B101 on several assert lines)
     )
 
 Rationale:
 
-* The *message* (not the code snippet) is used because it is stable across
-  export formats of the same scanner (e.g. semgrep JSON vs SARIF), while the
-  snippet is not always present in every format. Evidence changes are tracked
-  separately by scan comparison as "changed evidence" on the same fingerprint.
+* The code snippet is part of the identity because some scanner messages are
+  generic ("Use of assert detected...") — without the snippet, distinct
+  findings on different lines of one file would collapse into one.
+* Line numbers are deliberately excluded: edits above the finding shift lines
+  without changing the issue, and the snippet at the flagged line only changes
+  when the flagged code itself changes — exactly when a new finding identity
+  is warranted.
 * Dependency findings (no file) use ``package==version`` inside the message,
   so upgrading a package produces a new fingerprint (resolving the old one).
 * Truncating the hash to 128 bits keeps identifiers short; collision risk is
@@ -28,7 +34,13 @@ Rationale:
 
 Known, documented limits:
 
-* Two identical rules flagging byte-identical content at the same path merge
+* When the same scanner finding is imported through formats that differ in
+  whether they carry code snippets (e.g. semgrep JSON has snippets, some SARIF
+  exports do not), the fingerprints differ. PatchLedger's primary pipeline
+  (``patchledger scan``) always runs tools with a consistent format, so
+  fingerprints are stable across scans; mixing import formats for the same
+  tool is discouraged and documented.
+* Two byte-identical flagged snippets for the same rule at the same path merge
   into one fingerprint (identical issues are the same issue).
 * Gitleaks secrets are fingerprinted via their redacted match; two different
   secrets of the same type, at the same path, with the same prefix/suffix/length
@@ -41,7 +53,7 @@ import hashlib
 import json
 import re
 
-FP_VERSION = "fp1"
+FP_VERSION = "fp2"
 FP_LENGTH = 32  # hex chars (128 bits)
 
 
@@ -85,17 +97,19 @@ def compute_fingerprint(
 ) -> str:
     """Compute the stable fingerprint for a finding.
 
-    ``message`` is preferred; ``evidence`` is the fallback when a scanner
-    provides no message text.
+    Both ``message`` and ``evidence`` participate: the message carries
+    rule-specific semantics, the evidence distinguishes findings whose
+    messages are generic. Whitespace is normalized so formatting noise does
+    not change identity.
     """
-    identity = normalize_text_for_fingerprint(message) or normalize_text_for_fingerprint(evidence)
     payload = json.dumps(
         [
             FP_VERSION,
             normalize_scanner_name(scanner),
             rule_id,
             normalize_path_for_fingerprint(file_path),
-            identity,
+            normalize_text_for_fingerprint(message),
+            normalize_text_for_fingerprint(evidence),
         ],
         ensure_ascii=True,
         separators=(",", ":"),
