@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.venv/
+venv/
+build/
+dist/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# PatchLedger local databases (project data belongs to the user, never committed)
+*.patchledger.db
+patchledger.db
+*.db
+
+# Scanner output dropped during tests / dogfooding
+*.sarif
+!tests/fixtures/**/*.sarif
+
+# ZCode / plugin session state (not part of this project)
+.mimosa/
+.v2c/
+.video_agent/
+.zcode/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
