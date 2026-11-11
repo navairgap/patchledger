@@ -54,13 +54,16 @@ class ScanDiff:
 
 
 def _earlier_fingerprints(db: PatchLedgerDB, project_id: str, before_scan: Scan) -> set[str]:
-    """Fingerprints seen in any scan of the project strictly before `before_scan`."""
+    """Fingerprints seen in any scan of the project strictly before `before_scan`.
+
+    Scans are sequence-ordered, so everything listed before `before_scan` is
+    earlier — clock granularity does not matter.
+    """
     seen: set[str] = set()
     for scan in db.list_scans(project_id):
-        if scan.created_at < before_scan.created_at or (
-            scan.created_at == before_scan.created_at and scan.id < before_scan.id
-        ):
-            seen |= set(db.get_fingerprint_index(scan.id).keys())
+        if scan.id == before_scan.id:
+            break
+        seen |= set(db.get_fingerprint_index(scan.id).keys())
     return seen
 
 

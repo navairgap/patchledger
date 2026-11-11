@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS projects (
 
 CREATE TABLE IF NOT EXISTS scans (
     id TEXT PRIMARY KEY,
+    seq INTEGER NOT NULL UNIQUE,
     project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
     created_at TEXT NOT NULL,
     target_path TEXT NOT NULL,
@@ -61,7 +62,7 @@ CREATE TABLE IF NOT EXISTS scans (
     duration_ms INTEGER,
     notes TEXT
 );
-CREATE INDEX IF NOT EXISTS idx_scans_project ON scans(project_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_scans_project ON scans(project_id, seq);
 
 CREATE TABLE IF NOT EXISTS scan_tools (
     scan_id TEXT NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
@@ -266,17 +267,36 @@ class PatchLedgerDB:
             id=row["id"], name=row["name"], root_path=row["root_path"], created_at=row["created_at"]
         )
 
+    def list_projects(self) -> list[Project]:
+        rows = self._conn.execute("SELECT * FROM projects ORDER BY created_at ASC").fetchall()
+        return [
+            Project(
+                id=row["id"],
+                name=row["name"],
+                root_path=row["root_path"],
+                created_at=row["created_at"],
+            )
+            for row in rows
+        ]
+
     # ----------------------------------------------------------------- scans
     def insert_scan(self, scan: Scan, findings: list[Finding]) -> None:
         """Insert a scan with tool runs, findings and occurrences atomically."""
         try:
             with self._conn:
+                # seq gives scans a monotonic order: two scans within the same
+                # clock second must still have a deterministic "latest".
+                row = self._conn.execute(
+                    "SELECT COALESCE(MAX(seq), 0) AS m FROM scans"
+                ).fetchone()
+                next_seq = int(row["m"]) + 1
                 self._conn.execute(
-                    "INSERT INTO scans (id, project_id, created_at, target_path, source, "
+                    "INSERT INTO scans (id, seq, project_id, created_at, target_path, source, "
                     "label, git_commit, git_branch, duration_ms, notes) "
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     (
                         scan.id,
+                        next_seq,
                         scan.project_id,
                         scan.created_at,
                         scan.target_path,
@@ -387,9 +407,9 @@ class PatchLedgerDB:
         return _row_to_scan(row, tools)
 
     def list_scans(self, project_id: str) -> list[Scan]:
-        """Scans ordered oldest first (created_at, then id for stability)."""
+        """Scans ordered oldest first (monotonic insertion sequence)."""
         rows = self._conn.execute(
-            "SELECT * FROM scans WHERE project_id = ? ORDER BY created_at ASC, id ASC",
+            "SELECT * FROM scans WHERE project_id = ? ORDER BY seq ASC",
             (project_id,),
         ).fetchall()
         scans: list[Scan] = []
@@ -470,7 +490,7 @@ class PatchLedgerDB:
             FROM findings f JOIN scans s ON s.id = f.scan_id
             LEFT JOIN scan_tools st ON st.scan_id = s.id AND st.tool = f.scanner
             WHERE s.project_id = ? AND f.fingerprint = ?
-            ORDER BY s.created_at ASC, s.id ASC
+            ORDER BY s.seq ASC
             """,
             (project_id, fingerprint),
         ).fetchall()
@@ -485,7 +505,7 @@ class PatchLedgerDB:
                    f.rule_id, f.title, f.file_path, f.start_line, f.score
             FROM findings f JOIN scans s ON s.id = f.scan_id
             WHERE s.project_id = ?
-            ORDER BY s.created_at ASC, s.id ASC, f.fingerprint ASC
+            ORDER BY s.seq ASC, f.fingerprint ASC
             """,
             (project_id,),
         ).fetchall()

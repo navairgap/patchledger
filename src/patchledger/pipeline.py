@@ -56,6 +56,15 @@ def _normalize_and_merge(
     return merged, normalized, merged_count
 
 
+def _dedupe_tools(tools: list[ScanToolRun]) -> list[ScanToolRun]:
+    """One row per tool per scan (a tool appears once even if outcomes repeat)."""
+    seen: dict[str, ScanToolRun] = {}
+    for tool in tools:
+        if tool.tool not in seen:
+            seen[tool.tool] = tool
+    return list(seen.values())
+
+
 def _finalize(
     db: PatchLedgerDB, project_id: str, config: PatchLedgerConfig
 ) -> list[LedgerEntry]:
@@ -85,16 +94,18 @@ def scan_repository(
         source=ScanSource.SCAN,
         git_commit=commit,
         git_branch=branch,
-        tools=[
-            ScanToolRun(
-                tool=o.tool,
-                status=o.status,
-                version=o.version,
-                exit_code=o.exit_code,
-                note=o.note,
-            )
-            for o in outcomes
-        ],
+        tools=_dedupe_tools(
+            [
+                ScanToolRun(
+                    tool=o.tool,
+                    status=o.status,
+                    version=o.version,
+                    exit_code=o.exit_code,
+                    note=o.note,
+                )
+                for o in outcomes
+            ]
+        ),
         notes=json.dumps({"suppressed": normalized.suppressed}) if normalized.suppressed else None,
     )
     db.insert_scan(scan, findings)
@@ -143,14 +154,16 @@ def import_reports(
         label=label,
         # Imported reports cannot assert local scanner coverage: recorded as
         # IMPORTED status so patch verification treats resolutions honestly.
-        tools=[
-            ScanToolRun(
-                tool=name,
-                status=ToolRunStatus.IMPORTED,
-                note="imported report; scanner coverage not guaranteed",
-            )
-            for name in scanners_seen
-        ],
+        tools=_dedupe_tools(
+            [
+                ScanToolRun(
+                    tool=name,
+                    status=ToolRunStatus.IMPORTED,
+                    note="imported report; scanner coverage not guaranteed",
+                )
+                for name in scanners_seen
+            ]
+        ),
         notes=json.dumps({"suppressed": normalized.suppressed}) if normalized.suppressed else None,
     )
     db.insert_scan(scan, findings)

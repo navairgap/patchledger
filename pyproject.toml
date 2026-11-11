@@ -73,6 +73,7 @@ select = ["E", "F", "W", "I", "UP", "B", "S", "RUF"]
 ignore = [
     "S603",  # subprocess with explicit argv list is our documented pattern
     "S607",  # partial-path executable lookup is resolved via shutil.which
+    "B008",  # typer.Option/Argument calls in defaults are the required Typer idiom
 ]
 
 [tool.ruff.lint.per-file-ignores]
