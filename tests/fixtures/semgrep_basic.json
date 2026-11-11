@@ -1,0 +1,41 @@
+{
+  "results": [
+    {
+      "check_id": "python.lang.security.audit.subprocess-shell-true",
+      "path": "app/shell.py",
+      "start": {"line": 10, "col": 5},
+      "end": {"line": 12, "col": 30},
+      "extra": {
+        "message": "Detected subprocess function 'run_command' with 'shell=True'. Prefer a command list.",
+        "severity": "ERROR",
+        "lines": "subprocess.run(cmd, shell=True)\n",
+        "metadata": {
+          "category": "security",
+          "confidence": "HIGH",
+          "short_description": "Subprocess with shell=True",
+          "references": ["https://semgrep.dev/r/python.lang.security.audit.subprocess-shell-true"]
+        }
+      }
+    },
+    {
+      "check_id": "python.lang.security.audit.hardcoded-password-string",
+      "path": "app/config.py",
+      "start": {"line": 42, "col": 12},
+      "end": {"line": 42, "col": 45},
+      "extra": {
+        "message": "Detected hardcoded password secret in variable.",
+        "severity": "WARNING",
+        "lines": "PASSWORD = \"placeholder\"  # value withheld in fixture\n",
+        "masked_value_hint": null,
+        "metadata": {
+          "category": "secret",
+          "confidence": "HIGH",
+          "short_description": "Hardcoded password",
+          "references": []
+        }
+      }
+    }
+  ],
+  "errors": [],
+  "version": "1.185.0"
+}

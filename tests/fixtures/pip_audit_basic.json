@@ -1,0 +1,31 @@
+[
+  {
+    "name": "flask",
+    "version": "2.3.2",
+    "vulns": [
+      {
+        "id": "PYSEC-2026-0001",
+        "fix_versions": ["2.3.3"],
+        "aliases": ["GHSA-xxxx-xxxx-xxxx", "CVE-2026-0002"],
+        "description": "Synthetic vulnerability in Flask session handling (fixture)."
+      }
+    ]
+  },
+  {
+    "name": "requests",
+    "version": "2.6.0",
+    "vulns": [
+      {
+        "id": "GHSA-aaaa-bbbb-cccc",
+        "fix_versions": ["2.20.0"],
+        "aliases": [],
+        "description": "Synthetic certificate verification issue (fixture)."
+      }
+    ]
+  },
+  {
+    "name": "jinja2",
+    "version": "3.1.2",
+    "vulns": []
+  }
+]

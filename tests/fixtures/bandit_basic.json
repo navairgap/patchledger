@@ -1,0 +1,34 @@
+{
+  "results": [
+    {
+      "filename": "app/shell.py",
+      "line_number": 10,
+      "line_range": [10, 12],
+      "issue_confidence": "HIGH",
+      "issue_severity": "HIGH",
+      "issue_text": "subprocess call with shell=True identified, security issue.",
+      "test_id": "B602",
+      "test_name": "subprocess_popen_with_shell_equals_true",
+      "code": "   9 def run_command(cmd):\n> 10     subprocess.run(cmd, shell=True)\n  11     return 0\n",
+      "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b602_subprocess_popen_with_shell_equals_true.html",
+      "issue_cwe": {"id": 78, "href": "https://cwe.mitre.org/data/definitions/78.html"}
+    },
+    {
+      "filename": "app/config.py",
+      "line_number": 42,
+      "line_range": [42, 42],
+      "issue_confidence": "MEDIUM",
+      "issue_severity": "LOW",
+      "issue_text": "Possible hardcoded password: '(placeholder)'.",
+      "test_id": "B105",
+      "test_name": "hardcoded_password_string",
+      "code": "  41 # value withheld in fixture\n> 42 PASSWORD = \"placeholder\"\n  43\n",
+      "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b105_hardcoded_password_string.html"
+    }
+  ],
+  "errors": [],
+  "generated_at": "2026-11-11T20:00:00Z",
+  "metrics": {
+    "_totals": {"loc": 200, "nosec": 0}
+  }
+}

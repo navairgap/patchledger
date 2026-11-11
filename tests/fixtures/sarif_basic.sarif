@@ -1,0 +1,75 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Semgrep",
+          "version": "1.185.0",
+          "informationUri": "https://semgrep.dev",
+          "rules": [
+            {
+              "id": "sql-injection-string-concat",
+              "shortDescription": {"text": "SQL built from string concatenation"},
+              "help": {"text": "Use parameterized queries instead of string concatenation."},
+              "defaultConfiguration": {"level": "error"}
+            }
+          ]
+        }
+      },
+      "originalUriBaseIds": {
+        "%SRCROOT%": {"uri": "file:///home/dev/project/"}
+      },
+      "results": [
+        {
+          "ruleId": "sql-injection-string-concat",
+          "level": "error",
+          "message": {"text": "Possible SQL injection via string concatenation (fixture)."},
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {"uri": "app/db.py", "uriBaseId": "%SRCROOT%"},
+                "region": {
+                  "startLine": 30,
+                  "endLine": 32,
+                  "snippet": {"text": "query = \"SELECT ...\"  # fixture snippet"}
+                }
+              }
+            }
+          ],
+          "properties": {"confidence": "HIGH"}
+        },
+        {
+          "ruleId": "sql-injection-string-concat",
+          "message": {"text": "Finding without explicit level uses the rule default."},
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {"uri": "app%2Fpaths.py"},
+                "region": {"startLine": 7, "endLine": 7}
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tool": {
+        "driver": {
+          "name": "Trivy",
+          "version": "0.50.0",
+          "informationUri": "https://trivy.dev"
+        }
+      },
+      "results": [
+        {
+          "ruleId": "CVE-2026-0001",
+          "level": "warning",
+          "message": {"text": "Package 'openssl' is vulnerable (synthetic fixture)."},
+          "locations": []
+        }
+      ]
+    }
+  ]
+}

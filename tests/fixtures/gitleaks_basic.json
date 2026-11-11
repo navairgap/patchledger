@@ -1,0 +1,36 @@
+[
+  {
+    "RuleID": "aws-access-token",
+    "Description": "AWS Access Key (synthetic fixture value)",
+    "StartLine": 12,
+    "EndLine": 12,
+    "StartColumn": 9,
+    "EndColumn": 31,
+    "Match": "PLACEHOLDER-REPLACED-AT-RUNTIME",
+    "Secret": "PLACEHOLDER-REPLACED-AT-RUNTIME",
+    "File": "config/settings.py",
+    "Commit": "0123456789abcdef0123456789abcdef01234567",
+    "Date": "2026-01-15T10:00:00Z",
+    "Email": "dev@example.com",
+    "Message": "add settings module",
+    "Tags": ["key:aws", "entropy:5.1"],
+    "Fingerprint": "0123456789abcdef0123456789abcdef01234567"
+  },
+  {
+    "RuleID": "generic-api-key",
+    "Description": "Generic API Key (synthetic fixture value)",
+    "StartLine": 30,
+    "EndLine": 30,
+    "StartColumn": 14,
+    "EndColumn": 40,
+    "Match": "PLACEHOLDER-REPLACED-AT-RUNTIME",
+    "Secret": "PLACEHOLDER-REPLACED-AT-RUNTIME",
+    "File": "config/settings.py",
+    "Commit": "0123456789abcdef0123456789abcdef01234567",
+    "Date": "2026-01-15T10:00:00Z",
+    "Email": "dev@example.com",
+    "Message": "add settings module",
+    "Tags": [],
+    "Fingerprint": "0123456789abcdef0123456789abcdef01234568"
+  }
+]
