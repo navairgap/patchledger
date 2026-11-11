@@ -1,0 +1,57 @@
+name: CI
+
+"on":
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install package and dev dependencies
+        run: uv pip install --system -e ".[dev]"
+      - name: Run tests
+        run: pytest -q
+
+  lint:
+    name: Lint and type-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      - name: Install dependencies
+        run: uv pip install --system -e ".[dev]"
+      - name: Ruff
+        run: ruff check src tests scripts
+      - name: Mypy
+        run: mypy
+
+  build:
+    name: Build distribution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      - name: Build sdist and wheel
+        run: uv build
+      - name: Smoke-test the wheel in a fresh venv
+        run: |
+          uv venv /tmp/pl-smoke
+          VIRTUAL_ENV=/tmp/pl-smoke uv pip install dist/*.whl
+          /tmp/pl-smoke/bin/patchledger version
