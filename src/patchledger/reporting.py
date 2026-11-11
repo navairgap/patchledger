@@ -232,6 +232,42 @@ def _finding_dict(f: Finding) -> dict:
 
 
 # --------------------------------------------------------------- Markdown
+_MD_LEADING = ("#", "-", ">", "+", "|", "*")
+
+
+def _md_escape(text: str) -> str:
+    """Escape Markdown metacharacters in repo-controlled inline text.
+
+    Repo content flows into titles, descriptions, and guidance; without this
+    a crafted finding could forge headings, list items, or block quotes in
+    the rendered report (security review F6). Newlines are collapsed (they
+    would let content start a fresh line, the actual injection vector),
+    backslashes and backticks are escaped, and a leading structure character
+    is escaped for the cases where the text does start a line.
+    """
+    escaped = (
+        text.replace("\\", "\\\\")
+        .replace("`", "\\`")
+        .replace("\r\n", " ")
+        .replace("\n", " ")
+        .replace("\r", " ")
+    )
+    if escaped.startswith(_MD_LEADING):
+        escaped = "\\" + escaped
+    return escaped
+
+
+def _md_fence(evidence: str) -> str:
+    """A code fence longer than any backtick run inside the evidence
+    (CommonMark fence rule) so evidence cannot close its own block."""
+    longest = 0
+    run = 0
+    for char in evidence:
+        run = run + 1 if char == "`" else 0
+        longest = max(longest, run)
+    return "`" * max(3, longest + 1)
+
+
 def render_markdown(data: ReportData) -> str:
     """Human-readable Markdown report (escaping keeps structure intact)."""
     lines: list[str] = []
@@ -301,29 +337,31 @@ def render_markdown(data: ReportData) -> str:
     if not data.findings:
         push("_No findings recorded._")
     for i, f in enumerate(data.findings, 1):
-        push(f"### {i}. [{f.severity.value.upper()}] {f.title}")
+        push(f"### {i}. [{f.severity.value.upper()}] {_md_escape(f.title)}")
         push("")
-        push(f"- **Scanner:** {f.scanner} — rule `{f.rule_id}`")
+        push(f"- **Scanner:** {_md_escape(f.scanner)} — rule `{f.rule_id}`")
         push(f"- **Location:** `{f.location_str}`")
-        push(f"- **Category:** {f.category} — confidence: {f.confidence.value}"
-             + (f" (scanner said: {f.raw_severity})" if f.raw_severity else ""))
+        push(f"- **Category:** {_md_escape(f.category)} — confidence: {f.confidence.value}"
+             + (f" (scanner said: {_md_escape(f.raw_severity)})" if f.raw_severity else ""))
         push(f"- **Fingerprint:** `{f.fingerprint}`")
         if f.description and f.description != f.title:
-            push(f"- **Detail:** {f.description}")
+            push(f"- **Detail:** {_md_escape(f.description)}")
         if f.evidence:
+            fence = _md_fence(f.evidence)
             push("- **Evidence** (scanner-reported, secrets redacted):")
             push("")
-            push("```")
+            push(fence)
             for ev_line in f.evidence.rstrip().splitlines()[:20]:
                 push(ev_line)
-            push("```")
+            push(fence)
         if f.score_factors:
-            push(f"- **Risk score:** {f.score} — {'; '.join(f.score_factors)}")
+            push(f"- **Risk score:** {f.score} — "
+                 f"{_md_escape('; '.join(f.score_factors))}")
         if f.remediation:
             push("- **Remediation guidance** (advice, not evidence):")
             push("")
             for rem_line in f.remediation.splitlines():
-                push(f"  > {rem_line}")
+                push(f"  > {_md_escape(rem_line)}")
         if len(f.occurrences) > 1:
             push(f"- **Occurrences:** {len(f.occurrences)} sightings merged "
                  "(identical fingerprint)")

@@ -42,9 +42,11 @@ Known, documented limits:
   tool is discouraged and documented.
 * Two byte-identical flagged snippets for the same rule at the same path merge
   into one fingerprint (identical issues are the same issue).
-* Gitleaks secrets are fingerprinted via their redacted match; two different
-  secrets of the same type, at the same path, with the same prefix/suffix/length
-  can collide — see ``patchledger.normalizer`` redaction rules.
+* Gitleaks findings are fingerprinted via their **redacted** secret digest
+  (deterministic prefix/suffix/length), so two distinct leaked credentials
+  never share a fingerprint; the redaction is deterministic in the secret's
+  value, keeping identity stable across scans. Raw secret material never
+  participates in hashing or storage.
 """
 
 from __future__ import annotations

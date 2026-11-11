@@ -126,6 +126,12 @@ def _derive_title(raw: RawFinding) -> str:
 
 
 # -------------------------------------------------------------- the pipeline
+# Raw credential material keys (carried by parsers solely so this module can
+# build redacted evidence). They are stripped from ALL persisted metadata —
+# security review F1: they must never reach the database or any report.
+_SECRET_MATERIAL_KEYS = frozenset({"raw_secret", "raw_match"})
+
+
 @dataclass
 class NormalizeResult:
     findings: list[Finding]
@@ -140,6 +146,8 @@ def normalize_finding(
 
     Returns None when the finding is suppressed by explicit ``disabled_rules``
     configuration (never silently: the caller reports what was suppressed).
+    Raw secret material in metadata is consumed here for redacted evidence and
+    then dropped — it never reaches storage or reports.
     """
     scanner = normalize_scanner_name(raw.scanner)
     rule_id = raw.rule_id
@@ -157,6 +165,12 @@ def normalize_finding(
         evidence = redact_gitleaks_evidence(raw.metadata)
     if config.redact_secrets and category == "secret":
         evidence = redact_text(evidence)
+
+    metadata = {
+        key: value
+        for key, value in raw.metadata.items()
+        if key not in _SECRET_MATERIAL_KEYS
+    }
 
     rec = get_recommendation(scanner, rule_id, raw.metadata, raw.message)
     references = list(raw.references) + list(rec.references)
@@ -176,12 +190,19 @@ def normalize_finding(
     if not message and raw.description:
         message = raw.description
 
+    # Fingerprint evidence: for gitleaks, use the redacted secret digest so
+    # two distinct leaked credentials never share a fingerprint (F7); the
+    # redaction is deterministic in the secret's value, so identity remains
+    # stable across scans. For every other scanner the snippet participates
+    # as reported.
+    fingerprint_evidence = evidence if scanner == "gitleaks" else raw.evidence
+
     fingerprint = compute_fingerprint(
         scanner=scanner,
         rule_id=rule_id,
         file_path=raw.file_path,
         message=message,
-        evidence=raw.evidence,
+        evidence=fingerprint_evidence,
     )
 
     occurrence = Occurrence(
@@ -192,7 +213,7 @@ def normalize_finding(
         end_line=raw.end_line,
         evidence=evidence,
         message=message,
-        metadata=dict(raw.metadata),
+        metadata=metadata,
     )
 
     return Finding(
@@ -210,7 +231,7 @@ def normalize_finding(
         evidence=evidence,
         remediation="\n".join(remediation_parts),
         raw_severity=raw.severity_hint,
-        metadata=dict(raw.metadata),
+        metadata=metadata,
         occurrences=[occurrence],
     )
 

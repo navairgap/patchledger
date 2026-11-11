@@ -68,9 +68,7 @@ you choose to publish them (e.g. upload a CI artifact).
   gitleaks) are not currently parsed; a rule that never sees a file can still
   allow a false-verified resolution in that corner.
 * **Fingerprints are content-based.** Two byte-identical flagged snippets for
-  the same rule at the same path merge (identical issues are the same issue);
-  gitleaks secrets of the same type with identical prefix/suffix/length at
-  the same path can collide.
+  the same rule at the same path merge (identical issues are the same issue).
 * **Cross-format imports** of the same tool can produce different
   fingerprints when one format carries snippets the other doesn't.
 * **Redaction is heuristic.** Novel secret formats may pass through in
@@ -78,6 +76,24 @@ you choose to publish them (e.g. upload a CI artifact).
   contains until proven otherwise.
 * **Risk scores are prioritization aids**, not measurements; they are
   deterministic and explainable but not a substitute for human triage.
+* **Severity ceiling for coarse sources.** SARIF and semgrep only expose
+  error/warning/note levels, which normalize to at most `high`. Sources that
+  report `critical` explicitly can trigger a critical; `--fail-on critical`
+  therefore prints an explanatory notice and cannot rely on coarse sources
+  to ever produce critical findings.
+* **Scanning untrusted repositories.** PatchLedger never executes repo
+  scripts itself, but some *scanners* do inherently: `pip-audit -r
+  requirements.txt` performs dependency resolution that can build sdists
+  (executing `setup.py`), and tools may auto-load repo-level configs
+  (e.g. `gitleaks.toml`) that change their behavior. When scanning code you
+  do not trust, run PatchLedger inside a sandbox (container, throwaway VM)
+  — that is the standard practice for running arbitrary scanners against
+  untrusted trees, and it applies here too. Configuration under
+  `.patchledger/` controls thresholds and rule suppression, **never tool
+  execution**: there is deliberately no config-driven tool search path.
+* **Markdown reports** escape structure-forging metacharacters and size
+  evidence fences dynamically, but Markdown is a simpler format than the
+  zero-JavaScript HTML report; prefer HTML when sharing reports.
 
 ## Dependencies
 

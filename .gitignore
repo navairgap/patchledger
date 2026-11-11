@@ -15,6 +15,7 @@ coverage.xml
 htmlcov/
 
 # PatchLedger local databases (project data belongs to the user, never committed)
+.patchledger/
 *.patchledger.db
 patchledger.db
 *.db

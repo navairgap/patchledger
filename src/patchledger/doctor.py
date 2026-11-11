@@ -43,7 +43,7 @@ def run_doctor(
     # Scanners
     enabled = scanners if scanners is not None else config.scanning.enabled
     for tool in enabled:
-        path = discover_tool(tool, config.scanning.extra_paths)
+        path = discover_tool(tool)
         if path is None:
             checks.append(
                 Check(

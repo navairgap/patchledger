@@ -4,7 +4,7 @@
 
 - **Project:** example-project (synthetic)
 - **Root:** `/home/dev/example-project`
-- **Scan:** `bb509554abf5483baaa420279116dbab` (scan, 2026-11-11T12:00:00+00:00)
+- **Scan:** `5bd1488ebc894d029ff13ee128590ab6` (scan, 2026-11-11T12:00:00+00:00)
 - **Git:** `0f1e2d3c4b5a` on `main`
 - **Generated:** 2026-11-11T12:05:00+00:00
 - **Overall status:** **FAIL (incomplete coverage)**
@@ -106,7 +106,7 @@ subprocess.run(user_cmd, shell=True)
 - **Scanner:** gitleaks — rule `aws-access-token`
 - **Location:** `config/settings.py:12`
 - **Category:** secret — confidence: unknown (scanner said: high)
-- **Fingerprint:** `fp2:67450e9849f0608c55aa0cf0776c2a0e`
+- **Fingerprint:** `fp2:e9bbe256638d14343a4e2894bede4a94`
 - **Evidence** (scanner-reported, secrets redacted):
 
 ```

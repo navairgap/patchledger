@@ -20,13 +20,18 @@ DEFAULT_ENABLED_SCANNERS = ["semgrep", "gitleaks", "bandit", "pip-audit"]
 
 
 class ScanningConfig(BaseModel):
-    """Which scanners to run and how."""
+    """Which scanners to run and how.
+
+    Security note: configuration is DATA, not execution policy. Tool discovery
+    intentionally has no config-controlled search paths — a config file that
+    ships inside an untrusted repository must never be able to direct
+    PatchLedger to execute a binary of the attacker's choosing.
+    """
 
     model_config = ConfigDict(extra="forbid")
 
     enabled: list[str] = Field(default_factory=lambda: list(DEFAULT_ENABLED_SCANNERS))
     timeout_seconds: int = Field(default=600, ge=10, le=3600)
-    extra_paths: list[str] = Field(default_factory=list)  # extra dirs to look for tools
 
 
 class ScoringConfig(BaseModel):
@@ -66,15 +71,14 @@ class ScoringConfig(BaseModel):
 class VerificationConfig(BaseModel):
     """Patch verification strictness.
 
-    ``require_coverage_asserted``: a resolution can only be verified when the
-    current scan was produced locally by ``patchledger scan`` (coverage known).
-    Imported reports can never assert coverage, so verifications against them
-    are inconclusive by design.
+    Verification honesty is core behavior, not a knob: imported reports can
+    never assert coverage (recorded with status ``imported``), so
+    verifications against them are inconclusive by design. This section only
+    carries tuning that cannot weaken the guarantee.
     """
 
     model_config = ConfigDict(extra="forbid")
 
-    require_coverage_asserted: bool = True
     treat_version_change_as_caveat: bool = True
 
 

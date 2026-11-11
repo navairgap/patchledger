@@ -105,16 +105,15 @@ class ScannerOutcome:
     parse_result: ParseResult | None = None
 
 
-def discover_tool(name: str, extra_paths: list[str] | None = None) -> str | None:
+def discover_tool(name: str) -> str | None:
     """Locate a scanner binary.
 
-    Lookup order: config ``extra_paths``, then PATH, then the directory of the
-    running interpreter (a venv-installed scanner sits next to patchledger).
+    Lookup order: PATH, then the directory of the running interpreter (a
+    venv-installed scanner sits next to patchledger). There is deliberately
+    NO configuration-controlled search path: a config file shipped inside an
+    untrusted repository must never be able to direct PatchLedger to execute
+    an attacker-chosen binary (security review F2).
     """
-    for directory in extra_paths or []:
-        candidate = Path(directory) / name
-        if candidate.is_file() and (candidate.stat().st_mode & 0o111):
-            return str(candidate)
     found = shutil.which(name)
     if found:
         return found
@@ -143,17 +142,23 @@ def get_tool_version(tool_path: str, spec_version_args: list[str]) -> str | None
 
 def _parse_scanner_output(tool: str, report_text: str, scan_root: str | None) -> ParseResult:
     """Parse a scanner report by dispatching through the parser registry."""
-    import json
-
     from patchledger.parsers import _PARSERS
+    from patchledger.parsers.common import MAX_FINDINGS, loads_strict
     from patchledger.parsers.detect import detect_format
 
-    data = json.loads(report_text)
+    data = loads_strict(report_text, source=f"{tool} scanner")
     fmt = detect_format(data)
     parser = _PARSERS.get(fmt)
     if parser is None:
         raise ScannerError(f"No parser for detected format {fmt!r} from {tool}")
-    return parser(data, scan_root)
+    result = parser(data, scan_root)
+    if len(result.findings) > MAX_FINDINGS:
+        # Defensive cap against absurd scanner output; real runs stay far below.
+        raise ScannerError(
+            f"{tool} reported {len(result.findings)} findings, exceeding the "
+            f"{MAX_FINDINGS} limit — refusing to store."
+        )
+    return result
 
 
 def run_scanner(
@@ -184,14 +189,16 @@ def run_scanner(
             outcome.note = f"Unknown scanner {tool!r}"
             return outcome
 
-        # argv[0] is the DISCOVERED binary path, never a bare name: this keeps
-        # execution pinned to the tool we located (no PATH re-resolution).
-        argv = [tool_path, *argv]
-
         if not argv:
+            # e.g. pip-audit with no requirements*.txt: nothing to audit, and
+            # running it bare would audit the wrong scope (the local env).
             outcome.status = ToolRunStatus.SKIPPED
             outcome.note = "no requirements*.txt found; nothing for pip-audit to audit"
             return outcome
+
+        # argv[0] is the DISCOVERED binary path, never a bare name: this keeps
+        # execution pinned to the tool we located (no PATH re-resolution).
+        argv = [tool_path, *argv]
 
         started = time.monotonic()
         try:
@@ -258,7 +265,7 @@ def run_all_scanners(
     target_str = str(target)
 
     for tool in enabled:
-        tool_path = discover_tool(tool, config.scanning.extra_paths)
+        tool_path = discover_tool(tool)
         if tool_path is None:
             outcomes.append(
                 ScannerOutcome(

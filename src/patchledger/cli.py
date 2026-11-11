@@ -18,6 +18,7 @@ from pathlib import Path
 import click
 import typer
 from rich.console import Console
+from rich.markup import escape as rich_escape
 from rich.table import Table
 
 from patchledger import __version__
@@ -93,7 +94,9 @@ def _run(func):
         try:
             return func(*args, **kwargs)
         except PatchLedgerError as exc:
-            err_console.print(f"[red]Error:[/red] {exc}")
+            # escape(): scanner/repo-controlled text must not be interpreted
+            # as Rich markup (security review F10).
+            err_console.print(f"[red]Error:[/red] {rich_escape(str(exc))}")
             raise typer.Exit(_EXIT_ERROR) from None
         except (typer.Exit, click.exceptions.Exit, click.exceptions.Abort):
             raise  # intentional exit codes must pass through untouched
@@ -101,7 +104,8 @@ def _run(func):
             if _state.debug:
                 raise
             err_console.print(
-                f"[red]Unexpected error:[/red] {exc.__class__.__name__}: {exc}\n"
+                f"[red]Unexpected error:[/red] "
+                f"{rich_escape(f'{exc.__class__.__name__}: {exc}')}\n"
                 "Run with --debug for a full traceback."
             )
             raise typer.Exit(_EXIT_ERROR) from None
@@ -135,7 +139,12 @@ def _print_tool_table(scan: Scan) -> None:
     table.add_column("Version")
     table.add_column("Note", overflow="fold")
     for tool in scan.tools:
-        table.add_row(tool.tool, tool.status.value, tool.version or "-", tool.note or "")
+        table.add_row(
+            rich_escape(tool.tool),
+            tool.status.value,
+            rich_escape(tool.version or "-"),
+            rich_escape(tool.note or ""),
+        )
     console.print(table)
 
 
@@ -153,10 +162,10 @@ def _print_ledger(entries: list[LedgerEntry]) -> None:
             entry.status.value,
             entry.finding.severity.value,
             str(entry.finding.score),
-            entry.finding.scanner,
-            entry.finding.rule_id,
-            entry.finding.location_str,
-            entry.finding.title,
+            rich_escape(entry.finding.scanner),
+            rich_escape(entry.finding.rule_id),
+            rich_escape(entry.finding.location_str),
+            rich_escape(entry.finding.title),
         )
     console.print(table)
 
@@ -196,6 +205,14 @@ def init(
     # Default DB location is inside the target repo; an explicit --db wins.
     db_file = _state.db_path if _state.db_explicit else root / DB_DIRNAME / DB_FILENAME
     ledger_dir = db_file.parent
+    existing_config = ledger_dir / "config.json"
+    if existing_config.exists():
+        console.print(
+            f"[yellow]Existing config found:[/yellow] {existing_config}\n"
+            "Configuration is honored as-is. When scanning a repository you did "
+            "not write, review it first — it controls thresholds, rule "
+            "suppression and scoring (never tool execution)."
+        )
     config = PatchLedgerConfig.load(ledger_dir)
     config_path = config.save(ledger_dir)
     with PatchLedgerDB(db_file) as _:
@@ -258,6 +275,15 @@ def scan(
         err_console.print(f"[yellow]Warning:[/yellow] {warning}")
 
     threshold = fail_on or config.fail_on
+    if threshold == "critical":
+        # Honest limitation: SARIF and semgrep only expose coarse levels, so
+        # their findings cap at "high" in the normalized scale. A critical
+        # gate still works for sources that report critical explicitly.
+        console.print(
+            "[yellow]Note:[/yellow] SARIF/semgrep sources report coarse levels "
+            "only and normalize to at most 'high' — --fail-on critical gates "
+            "findings from sources that report critical explicitly."
+        )
     open_or_reintroduced = [
         e for e in result.ledger if e.status in (FindingStatus.OPEN, FindingStatus.REINTRODUCED)
     ]

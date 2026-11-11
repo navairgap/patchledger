@@ -1,12 +1,14 @@
 """Validate GitHub Actions workflow YAML: parseable, well-formed, least-privilege."""
 
+import re
 from pathlib import Path
 
 import yaml
 
 REPO = Path(__file__).resolve().parent.parent
 WORKFLOWS = sorted((REPO / ".github" / "workflows").glob("*.yml"))
-REQUIRED_ACTION_PINS = ("@v",)  # every `uses:` must pin a version
+# Every `uses:` must be pinned: full commit SHA (preferred) or version tag.
+_PIN_RE = re.compile(r"@[0-9a-f]{40}$|@v\d+")
 
 
 def validate(path: Path) -> list[str]:
@@ -39,7 +41,7 @@ def validate(path: Path) -> list[str]:
             run = step.get("run")
             if not uses and not run:
                 problems.append(f"{path.name}:{job_name}: step has neither uses nor run")
-            if uses and not any(pin in str(uses) for pin in REQUIRED_ACTION_PINS):
+            if uses and not _PIN_RE.search(str(uses).split()[0]):
                 problems.append(f"{path.name}:{job_name}: action '{uses}' is not version-pinned")
     perms = doc.get("permissions")
     if perms is None:

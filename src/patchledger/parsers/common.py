@@ -51,6 +51,28 @@ def reject_constant(value: str) -> None:
     raise ReportImportError(f"JSON contains non-standard numeric constant: {value!r}")
 
 
+MAX_FINDINGS = 50_000
+
+
+def loads_strict(text: str, source: str = "report") -> object:
+    """Parse JSON text with the same strictness as ``load_json_report``.
+
+    Used for scanner stdout on the live-scan path, which previously used a
+    plain ``json.loads`` and would have accepted NaN/Infinity constants.
+    """
+    try:
+        return json.loads(text, parse_constant=reject_constant)
+    except ReportImportError:
+        raise
+    except json.JSONDecodeError as exc:
+        raise ReportImportError(
+            f"{source} output is not valid JSON: {exc.msg} (line {exc.lineno}, "
+            f"column {exc.colno})"
+        ) from exc
+    except RecursionError as exc:
+        raise ReportImportError(f"{source} output is nested too deeply to parse safely.") from exc
+
+
 def load_json_report(path: Path, max_mb: int) -> object:
     """Load a JSON report safely: size cap, strict parsing, clear errors.
 

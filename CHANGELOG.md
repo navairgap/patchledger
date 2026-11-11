@@ -42,10 +42,20 @@ adheres to [Semantic Versioning](https://semver.org/).
 - Documentation: installation, usage, architecture, security model, FAQ,
   example CI workflow; community files (CONTRIBUTING, SECURITY, Code of
   Conduct, changelog, issue/PR templates).
-- 102 tests covering parsers (incl. malformed/hostile input), fingerprints,
+- Security hardening from the independent security review: raw secret
+  material is stripped from all persisted metadata (JSON reports and the
+  database), repo-supplied configuration can no longer influence tool
+  discovery (config is data, not execution policy), Markdown reports escape
+  structure-forging content with dynamic fence sizing, the live-scan parse
+  path uses the strict JSON loader, a finding-count cap guards against
+  absurd scanner output, Rich markup escaping in CLI output, an honesty
+  notice for `--fail-on critical` with coarse sources, and GitHub Actions
+  pinned to verified commit SHAs.
+- 108 tests covering parsers (incl. malformed/hostile input), fingerprints,
   normalization, dedup, scoring, storage persistence, comparison, all four
-  verification guards, report XSS resistance, CLI commands, and live
-  scanner validation against real semgrep/bandit/pip-audit output.
+  verification guards, report XSS resistance, CLI commands, security-fix
+  regressions, and live scanner validation against real
+  semgrep/bandit/pip-audit output.
 
 ### Known limitations
 

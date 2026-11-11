@@ -40,10 +40,12 @@ sys.exit(5)
 """
 
 
-def test_discover_tool_via_extra_paths(tmp_path):
+def test_discover_tool_ignores_local_files(tmp_path):
+    """Regression (security review F2): discovery must never honor
+    repo-local executable files — only PATH and the interpreter's directory."""
     script = _make_executable(tmp_path / "fakescan", "#!/bin/sh\necho ok\n")
-    found = discover_tool("fakescan", extra_paths=[str(tmp_path)])
-    assert found == str(script)
+    assert discover_tool("fakescan") is None  # exists on disk, not on PATH
+    assert script.exists()
 
 
 def test_discover_tool_missing(tmp_path):
