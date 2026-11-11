@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'">
+<title>PatchLedger report — example-project (synthetic)</title>
+<style>
+:root {
+  --bg: #0d1117; --bg2: #111826; --panel: #161b27; --line: #232b3b;
+  --text: #dce3ed; --muted: #8b96a8;
+  --green: #3fb968; --green-dim: #1d3a29;
+  --red: #e5534b; --orange: #d18616; --yellow: #d4a72c; --blue: #539bf5;
+  --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 15px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+header { border-bottom: 1px solid var(--line); padding-bottom: 1.5rem; margin-bottom: 2rem; }
+.brand { color: var(--green); font-weight: 700; letter-spacing: .04em; font-size: .85rem;
+  text-transform: uppercase; }
+h1 { font-size: 1.7rem; margin: .35rem 0 .5rem; }
+h2 { font-size: 1.15rem; margin: 2.25rem 0 .75rem; color: var(--text);
+  border-bottom: 1px solid var(--line); padding-bottom: .4rem; }
+h3 { font-size: 1rem; margin: 0 0 .6rem; }
+.meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: .6rem 1.5rem; }
+.meta div { font-size: .9rem; }
+.meta span.k { color: var(--muted); display: inline-block; min-width: 6.5rem; }
+code, .mono { font-family: var(--mono); font-size: .85em; color: #a8d0b0;
+  background: var(--bg2); padding: .1em .4em; border-radius: 4px; word-break: break-all; }
+.badge { display: inline-block; padding: .18rem .7rem; border-radius: 999px;
+  font-weight: 700; font-size: .8rem; letter-spacing: .05em; text-transform: uppercase; }
+.badge.fail { background: #3a1d20; color: var(--red); border: 1px solid #6b2a2c; }
+.badge.warn { background: #33260e; color: var(--yellow); border: 1px solid #5c481c; }
+.badge.pass { background: var(--green-dim); color: var(--green); border: 1px solid #2a5238; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+  padding: 1rem 1.25rem; margin: .75rem 0; }
+table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+th, td { text-align: left; padding: .45rem .6rem; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); font-weight: 600; }
+.counts { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: .75rem; }
+.count { background: var(--bg2); border: 1px solid var(--line); border-radius: 10px;
+  padding: .8rem 1rem; text-align: center; }
+.count .n { font-size: 1.6rem; font-weight: 800; }
+.count .lbl { font-size: .75rem; color: var(--muted); text-transform: uppercase;
+  letter-spacing: .06em; }
+.sev-critical { color: var(--red); } .sev-high { color: var(--orange); }
+.sev-medium { color: var(--yellow); } .sev-low { color: var(--blue); }
+.sev-info, .sev-unknown { color: var(--muted); }
+.finding { border-left: 3px solid var(--line); margin: 1rem 0; }
+.finding.critical, .finding.high { border-left-color: var(--red); }
+.finding.medium { border-left-color: var(--orange); }
+.finding.low { border-left-color: var(--blue); }
+.finding-head { display: flex; flex-wrap: wrap; gap: .5rem; align-items: baseline; }
+.finding-head .idx { color: var(--muted); font-size: .85rem; }
+.sev-tag { font-size: .72rem; font-weight: 800; padding: .12rem .5rem;
+  border-radius: 4px; text-transform: uppercase; letter-spacing: .05em; }
+.sev-tag.critical, .sev-tag.high { background: #3a1d20; color: var(--red); }
+.sev-tag.medium { background: #33260e; color: var(--yellow); }
+.sev-tag.low { background: #16262e; color: var(--blue); }
+.sev-tag.info, .sev-tag.unknown { background: var(--bg2); color: var(--muted); }
+pre.evidence {
+  background: #0a0e14; border: 1px solid var(--line); border-radius: 8px;
+  padding: .75rem 1rem; overflow-x: auto; font-family: var(--mono); font-size: .82rem;
+  color: #b8c4d4; margin: .6rem 0;
+}
+.remediation { border-left: 3px solid var(--green-dim); padding: .4rem 0 .4rem 1rem;
+  margin: .6rem 0; color: var(--muted); font-size: .9rem; white-space: pre-wrap; }
+.remediation strong { color: var(--green); }
+.note { background: #1c2a1e; border: 1px solid #2a5238; color: #9fd8ae; border-radius: 8px;
+  padding: .7rem 1rem; margin: 1rem 0; font-size: .9rem; }
+.warnbox { background: #2d2410; border: 1px solid #5c481c; color: #e8c66a; border-radius: 8px;
+  padding: .7rem 1rem; margin: 1rem 0; font-size: .9rem; }
+footer { margin-top: 3rem; border-top: 1px solid var(--line); padding-top: 1rem;
+  color: var(--muted); font-size: .82rem; }
+a { color: var(--blue); }
+@media (max-width: 640px) { .wrap { padding: 1.25rem .9rem 3rem; } h1 { font-size: 1.35rem; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="brand">PatchLedger — Find it. Understand it. Fix it. Prove it.</div>
+<h1>Security Report</h1>
+<div class="note"><strong>SYNTHETIC EXAMPLE DATA</strong> — generated for illustration only, not the result of a real scan.</div>
+<div class="meta">
+<div><span class='k'>Project</span> example-project (synthetic)</div>
+<div><span class='k'>Root</span> <code>/home/dev/example-project</code></div>
+<div><span class='k'>Scan</span> <code>2c7adf87b15d43f9bb0ae33cc2f4d6ef</code></div>
+<div><span class='k'>Created</span> 2026-11-11T12:00:00+00:00</div>
+<div><span class='k'>Source</span> scan</div>
+<div><span class='k'>Git</span> <code>0f1e2d3c4b5a</code> (main)</div>
+<div><span class='k'>Generated</span> 2026-11-11T12:05:00+00:00</div>
+<div><span class='k'>Status</span> <span class="badge fail">FAIL (incomplete coverage)</span></div>
+</div>
+</header>
+<h2>Scanner coverage</h2>
+<div class="panel"><table>
+<tr><th>Tool</th><th>Status</th><th>Version</th><th>Note</th></tr>
+<tr><td><code>semgrep</code></td><td>ran</td><td>1.185.0</td><td>-</td></tr>
+<tr><td><code>bandit</code></td><td>ran</td><td>1.9.4</td><td>-</td></tr>
+<tr><td><code>pip-audit</code></td><td>ran</td><td>2.10.1</td><td>-</td></tr>
+<tr><td><code>gitleaks</code></td><td>unavailable</td><td>-</td><td>not installed on this machine</td></tr>
+<tr><td><code>trivy</code></td><td>skipped</td><td>-</td><td>disabled in project configuration</td></tr>
+</table></div>
+<div class="warnbox"><strong>Incomplete coverage</strong> — some tools did not run. Findings are not a complete picture, and any resolution claims are treated as unverified.</div>
+<h2>Summary</h2>
+<div class="counts">
+<div class="count"><div class="n sev-critical">0</div><div class="lbl">critical</div></div>
+<div class="count"><div class="n sev-high">4</div><div class="lbl">high</div></div>
+<div class="count"><div class="n sev-medium">1</div><div class="lbl">medium</div></div>
+<div class="count"><div class="n sev-low">1</div><div class="lbl">low</div></div>
+<div class="count"><div class="n sev-info">0</div><div class="lbl">info</div></div>
+<div class="count"><div class="n sev-unknown">0</div><div class="lbl">unknown</div></div>
+</div>
+<h2>Comparison with scan <code>3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c</code> (2026-11-04T09:00:00+00:00)</h2>
+<div class="panel"><table>
+<tr><th>New</th><td>1</td></tr>
+<tr><th>Persistent</th><td>4</td></tr>
+<tr><th>Resolved candidates</th><td>2</td></tr>
+<tr><th>Verified fixed</th><td>1</td></tr>
+<tr><th>Inconclusive</th><td>1</td></tr>
+<tr><th>Reintroduced</th><td>0</td></tr>
+<tr><th>Changed severity</th><td>0</td></tr>
+<tr><th>Changed evidence</th><td>1</td></tr>
+</table>
+<div class="note">Resolution of one finding was inconclusive: gitleaks did not run in the current scan.</div>
+</div>
+<h2>Findings (6)</h2>
+<div class="finding high panel">
+<div class="finding-head">
+<span class="idx">#1</span>
+<span class="sev-tag high">high</span>
+<h3>Vulnerable dependency: flask==0.12.4 (PYSEC-2023-62) — fixed in 2.2.5, 2.3.2</h3>
+</div>
+<div><span class='k' style='color:var(--muted)'>Scanner</span> pip-audit — <code>PYSEC-2023-62</code></div>
+<div><span class='k' style='color:var(--muted)'>Location</span> <code>-</code></div>
+<div><span class='k' style='color:var(--muted)'>Category</span> dependency — confidence unknown (scanner said: high) — fingerprint <code>fp2:ff1f8e904c5964f6fbcc8a7f531344bd</code></div>
+<div style='color:var(--muted);font-size:.85rem'>Evidence (scanner-reported, secrets redacted):</div>
+<pre class='evidence'>flask==0.12.4</pre>
+<div class="remediation"><strong>Remediation guidance</strong> (advice, not evidence):
+Why it matters: A dependency with a publicly known vulnerability is used.
+Potential consequences: Attack techniques for published CVEs are widely available and often trivially applicable.
+Recommended fix: Upgrade the package to at least the fixed version; review the advisory for breaking changes; verify the fix with a rescan.
+Scanner-suggested fix: Upgrade flask to 2.3.2 or later
+</div>
+</div>
+<div class="finding high panel">
+<div class="finding-head">
+<span class="idx">#2</span>
+<span class="sev-tag high">high</span>
+<h3>Possible SQL injection vector through string use.</h3>
+</div>
+<div><span class='k' style='color:var(--muted)'>Scanner</span> bandit — <code>B608</code></div>
+<div><span class='k' style='color:var(--muted)'>Location</span> <code>app/db.py:133</code></div>
+<div><span class='k' style='color:var(--muted)'>Category</span> injection — confidence unknown (scanner said: HIGH) — fingerprint <code>fp2:a24c59e26cf07a8d38a0d1a9fa2f9b09</code></div>
+<div style='color:var(--muted);font-size:.85rem'>Evidence (scanner-reported, secrets redacted):</div>
+<pre class='evidence'>cursor.execute(&quot;SELECT * FROM users WHERE name=&#x27;&quot; + name + &quot;&#x27;&quot;)</pre>
+<div class="remediation"><strong>Remediation guidance</strong> (advice, not evidence):
+Why it matters: SQL built by string formatting mixes code and data. Attacker-controlled fragments can change query semantics.
+Potential consequences: Data exfiltration, modification or destruction; in some stacks, full server compromise via stacked queries.
+Recommended fix: Use parameterized queries or the ORM. Never interpolate values into SQL strings; if identifiers must be dynamic, validate them against an allowlist.
+Secure pattern: cursor.execute(&quot;SELECT * FROM users WHERE id = ?&quot;, (user_id,))
+References: https://owasp.org/www-community/attacks/SQL_Injection
+</div>
+</div>
+<div class="finding high panel">
+<div class="finding-head">
+<span class="idx">#3</span>
+<span class="sev-tag high">high</span>
+<h3>Detected subprocess with shell=True. Prefer a command list.</h3>
+</div>
+<div><span class='k' style='color:var(--muted)'>Scanner</span> semgrep — <code>python.lang.security.audit.subprocess-shell-true</code></div>
+<div><span class='k' style='color:var(--muted)'>Location</span> <code>app/jobs.py:87</code></div>
+<div><span class='k' style='color:var(--muted)'>Category</span> injection — confidence unknown (scanner said: ERROR) — fingerprint <code>fp2:ca5e7d4632e0178190d87192beae15b5</code></div>
+<div style='color:var(--muted);font-size:.85rem'>Evidence (scanner-reported, secrets redacted):</div>
+<pre class='evidence'>subprocess.run(user_cmd, shell=True)</pre>
+<div class="remediation"><strong>Remediation guidance</strong> (advice, not evidence):
+Why it matters: A subprocess is started through a shell. If any argument derives from user or environment input, shell metacharacters can turn it into arbitrary command execution.
+Potential consequences: An attacker who controls part of the command string may execute arbitrary commands with the privileges of the application.
+Recommended fix: Pass the command as an argument list and set shell=False. Validate or constrain any dynamic values. If a shell is truly required, avoid interpolating untrusted input and prefer shlex.quote on fixed parts.
+Secure pattern: subprocess.run([&quot;git&quot;, &quot;status&quot;], check=True, shell=False)
+References: https://bandit.readthedocs.io/en/latest/plugins/b602_subprocess_popen_with_shell_equals_true.html; https://owasp.org/www-community/attacks/Command_Injection
+Scanner-suggested fix: subprocess.run(shlex.split(user_cmd), shell=False)
+</div>
+</div>
+<div class="finding high panel">
+<div class="finding-head">
+<span class="idx">#4</span>
+<span class="sev-tag high">high</span>
+<h3>AWS Access Key</h3>
+</div>
+<div><span class='k' style='color:var(--muted)'>Scanner</span> gitleaks — <code>aws-access-token</code></div>
+<div><span class='k' style='color:var(--muted)'>Location</span> <code>config/settings.py:12</code></div>
+<div><span class='k' style='color:var(--muted)'>Category</span> secret — confidence unknown (scanner said: high) — fingerprint <code>fp2:67450e9849f0608c55aa0cf0776c2a0e</code></div>
+<div style='color:var(--muted);font-size:.85rem'>Evidence (scanner-reported, secrets redacted):</div>
+<pre class='evidence'>aws_key = &quot;[redacted-token]EXAMP&quot;</pre>
+<div class="remediation"><strong>Remediation guidance</strong> (advice, not evidence):
+Why it matters: A credential matching a known service format was detected.
+Potential consequences: A working credential in an attacker&#x27;s hands allows direct access to the linked service under your identity.
+Recommended fix: Revoke and rotate the credential immediately, remove it from the code and git history, and load it from a secret manager or environment at runtime. For git history remediation use the service&#x27;s documented revocation flow first.
+References: https://owasp.org/www-project-top-ten/2023/A07_2023-Identification_and_Authentication_Failures
+</div>
+</div>
+<div class="finding medium panel">
+<div class="finding-head">
+<span class="idx">#5</span>
+<span class="sev-tag medium">medium</span>
+<h3>Detected hardcoded password secret in variable.</h3>
+</div>
+<div><span class='k' style='color:var(--muted)'>Scanner</span> semgrep — <code>python.lang.security.audit.hardcoded-password-string</code></div>
+<div><span class='k' style='color:var(--muted)'>Location</span> <code>app/jobs.py:41</code></div>
+<div><span class='k' style='color:var(--muted)'>Category</span> secret — confidence unknown (scanner said: WARNING) — fingerprint <code>fp2:0d6e0d57aa522c8579a2d04430e076b6</code></div>
+<div style='color:var(--muted);font-size:.85rem'>Evidence (scanner-reported, secrets redacted):</div>
+<pre class='evidence'>DB_PASS = &quot;pla…ed&quot; [redacted]</pre>
+<div class="remediation"><strong>Remediation guidance</strong> (advice, not evidence):
+Why it matters: A credential appears to be embedded in source code. Anything committed to a repository must be treated as public.
+Potential consequences: Anyone with repository access (or access to git history) obtains the credential; secret scanning on public platforms will flag it.
+Recommended fix: Remove the literal, move the value to an environment variable or a secret manager, and rotate the credential — removing the code does not remove it from git history. Consider history rewriting only with a coordinated plan; rotation is the reliable fix.
+Secure pattern: API_KEY = os.environ[&quot;API_KEY&quot;]  # injected at runtime
+References: https://owasp.org/www-project-top-ten/2023/A07_2023-Identification_and_Authentication_Failures
+</div>
+</div>
+<div class="finding low panel">
+<div class="finding-head">
+<span class="idx">#6</span>
+<span class="sev-tag low">low</span>
+<h3>Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.</h3>
+</div>
+<div><span class='k' style='color:var(--muted)'>Scanner</span> bandit — <code>B101</code></div>
+<div><span class='k' style='color:var(--muted)'>Location</span> <code>app/validate.py:22</code></div>
+<div><span class='k' style='color:var(--muted)'>Category</span> sast — confidence unknown (scanner said: LOW) — fingerprint <code>fp2:80b35b6c0e4d19e541cc2cf737b5c454</code></div>
+<div style='color:var(--muted);font-size:.85rem'>Evidence (scanner-reported, secrets redacted):</div>
+<pre class='evidence'>assert token is not None</pre>
+<div class="remediation"><strong>Remediation guidance</strong> (advice, not evidence):
+Why it matters: Static analysis flagged this code pattern as risky.
+Potential consequences: Depends on the rule; review the scanner description and references for the specific risk.
+Recommended fix: Review the flagged location, confirm whether the risk applies, and apply the scanner&#x27;s suggested remediation.
+</div>
+</div>
+<footer>
+Generated by patchledger 0.1.0 — evidence is scanner-reported; remediation text is advice from the local knowledge base. This report contains no JavaScript.
+</footer>
+</div>
+</body>
+</html>

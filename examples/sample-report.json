@@ -1,0 +1,303 @@
+{
+  "schema_version": 1,
+  "generator": "patchledger 0.1.0",
+  "generated_at": "2026-11-11T12:05:00+00:00",
+  "synthetic_example": true,
+  "project": {
+    "name": "example-project (synthetic)",
+    "root": "/home/dev/example-project"
+  },
+  "scan": {
+    "id": "2c7adf87b15d43f9bb0ae33cc2f4d6ef",
+    "created_at": "2026-11-11T12:00:00+00:00",
+    "target_path": "/home/dev/example-project",
+    "source": "scan",
+    "label": null,
+    "git_commit": "0f1e2d3c4b5a69788796a5b4c3d2e1f001122334",
+    "git_branch": "main",
+    "notes": null,
+    "tools": [
+      {
+        "tool": "semgrep",
+        "status": "ran",
+        "version": "1.185.0",
+        "exit_code": null,
+        "note": null
+      },
+      {
+        "tool": "bandit",
+        "status": "ran",
+        "version": "1.9.4",
+        "exit_code": null,
+        "note": null
+      },
+      {
+        "tool": "pip-audit",
+        "status": "ran",
+        "version": "2.10.1",
+        "exit_code": null,
+        "note": null
+      },
+      {
+        "tool": "gitleaks",
+        "status": "unavailable",
+        "version": null,
+        "exit_code": null,
+        "note": "not installed on this machine"
+      },
+      {
+        "tool": "trivy",
+        "status": "skipped",
+        "version": null,
+        "exit_code": null,
+        "note": "disabled in project configuration"
+      }
+    ]
+  },
+  "coverage": {
+    "complete": false,
+    "ran": [
+      "semgrep",
+      "bandit",
+      "pip-audit"
+    ],
+    "failed": [],
+    "unavailable": [
+      "gitleaks"
+    ],
+    "skipped": [
+      "trivy"
+    ],
+    "imported": []
+  },
+  "overall_status": "FAIL (incomplete coverage)",
+  "summary": {
+    "finding_count": 6,
+    "by_severity": {
+      "critical": 0,
+      "high": 4,
+      "medium": 1,
+      "low": 1,
+      "info": 0,
+      "unknown": 0
+    }
+  },
+  "comparison": {
+    "baseline_scan_id": "3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c",
+    "baseline_created_at": "2026-11-04T09:00:00+00:00",
+    "new": 1,
+    "persistent": 4,
+    "resolved_candidates": 2,
+    "reintroduced": 0,
+    "changed_severity": 0,
+    "changed_evidence": 1,
+    "verified_fixed": 1,
+    "inconclusive": 1,
+    "notes": [
+      "Resolution of one finding was inconclusive: gitleaks did not run in the current scan."
+    ]
+  },
+  "findings": [
+    {
+      "id": "4b85817f7a2f45f6857b4acbc9fc1e15",
+      "fingerprint": "fp2:ff1f8e904c5964f6fbcc8a7f531344bd",
+      "scanner": "pip-audit",
+      "rule_id": "PYSEC-2023-62",
+      "severity": "high",
+      "raw_severity": "high",
+      "confidence": "unknown",
+      "category": "dependency",
+      "title": "Vulnerable dependency: flask==0.12.4 (PYSEC-2023-62) — fixed in 2.2.5, 2.3.2",
+      "description": "Vulnerable dependency: flask==0.12.4 (PYSEC-2023-62) — fixed in 2.2.5, 2.3.2",
+      "file_path": null,
+      "start_line": null,
+      "end_line": null,
+      "evidence": "flask==0.12.4",
+      "remediation": "Why it matters: A dependency with a publicly known vulnerability is used.\nPotential consequences: Attack techniques for published CVEs are widely available and often trivially applicable.\nRecommended fix: Upgrade the package to at least the fixed version; review the advisory for breaking changes; verify the fix with a rescan.\nScanner-suggested fix: Upgrade flask to 2.3.2 or later",
+      "score": 0,
+      "score_factors": [],
+      "status": "open",
+      "metadata": {},
+      "occurrences": [
+        {
+          "scanner": "pip-audit",
+          "rule_id": "PYSEC-2023-62",
+          "file_path": null,
+          "start_line": null,
+          "end_line": null,
+          "evidence": "flask==0.12.4",
+          "message": "Vulnerable dependency: flask==0.12.4 (PYSEC-2023-62) — fixed in 2.2.5, 2.3.2",
+          "metadata": {}
+        }
+      ]
+    },
+    {
+      "id": "8f072fe456994a7cb1ba37aeac05c92c",
+      "fingerprint": "fp2:a24c59e26cf07a8d38a0d1a9fa2f9b09",
+      "scanner": "bandit",
+      "rule_id": "B608",
+      "severity": "high",
+      "raw_severity": "HIGH",
+      "confidence": "unknown",
+      "category": "injection",
+      "title": "Possible SQL injection vector through string use.",
+      "description": "Possible SQL injection vector through string use.",
+      "file_path": "app/db.py",
+      "start_line": 133,
+      "end_line": null,
+      "evidence": "cursor.execute(\"SELECT * FROM users WHERE name='\" + name + \"'\")",
+      "remediation": "Why it matters: SQL built by string formatting mixes code and data. Attacker-controlled fragments can change query semantics.\nPotential consequences: Data exfiltration, modification or destruction; in some stacks, full server compromise via stacked queries.\nRecommended fix: Use parameterized queries or the ORM. Never interpolate values into SQL strings; if identifiers must be dynamic, validate them against an allowlist.\nSecure pattern: cursor.execute(\"SELECT * FROM users WHERE id = ?\", (user_id,))\nReferences: https://owasp.org/www-community/attacks/SQL_Injection",
+      "score": 0,
+      "score_factors": [],
+      "status": "open",
+      "metadata": {},
+      "occurrences": [
+        {
+          "scanner": "bandit",
+          "rule_id": "B608",
+          "file_path": "app/db.py",
+          "start_line": 133,
+          "end_line": null,
+          "evidence": "cursor.execute(\"SELECT * FROM users WHERE name='\" + name + \"'\")",
+          "message": "Possible SQL injection vector through string use.",
+          "metadata": {}
+        }
+      ]
+    },
+    {
+      "id": "6f92075f8b094c0a97716c070f0ba001",
+      "fingerprint": "fp2:ca5e7d4632e0178190d87192beae15b5",
+      "scanner": "semgrep",
+      "rule_id": "python.lang.security.audit.subprocess-shell-true",
+      "severity": "high",
+      "raw_severity": "ERROR",
+      "confidence": "unknown",
+      "category": "injection",
+      "title": "Detected subprocess with shell=True. Prefer a command list.",
+      "description": "Detected subprocess with shell=True. Prefer a command list.",
+      "file_path": "app/jobs.py",
+      "start_line": 87,
+      "end_line": null,
+      "evidence": "subprocess.run(user_cmd, shell=True)",
+      "remediation": "Why it matters: A subprocess is started through a shell. If any argument derives from user or environment input, shell metacharacters can turn it into arbitrary command execution.\nPotential consequences: An attacker who controls part of the command string may execute arbitrary commands with the privileges of the application.\nRecommended fix: Pass the command as an argument list and set shell=False. Validate or constrain any dynamic values. If a shell is truly required, avoid interpolating untrusted input and prefer shlex.quote on fixed parts.\nSecure pattern: subprocess.run([\"git\", \"status\"], check=True, shell=False)\nReferences: https://bandit.readthedocs.io/en/latest/plugins/b602_subprocess_popen_with_shell_equals_true.html; https://owasp.org/www-community/attacks/Command_Injection\nScanner-suggested fix: subprocess.run(shlex.split(user_cmd), shell=False)",
+      "score": 0,
+      "score_factors": [],
+      "status": "open",
+      "metadata": {},
+      "occurrences": [
+        {
+          "scanner": "semgrep",
+          "rule_id": "python.lang.security.audit.subprocess-shell-true",
+          "file_path": "app/jobs.py",
+          "start_line": 87,
+          "end_line": null,
+          "evidence": "subprocess.run(user_cmd, shell=True)",
+          "message": "Detected subprocess with shell=True. Prefer a command list.",
+          "metadata": {}
+        }
+      ]
+    },
+    {
+      "id": "f3b6795a68c84ea6ba87050403616987",
+      "fingerprint": "fp2:67450e9849f0608c55aa0cf0776c2a0e",
+      "scanner": "gitleaks",
+      "rule_id": "aws-access-token",
+      "severity": "high",
+      "raw_severity": "high",
+      "confidence": "unknown",
+      "category": "secret",
+      "title": "AWS Access Key",
+      "description": "AWS Access Key",
+      "file_path": "config/settings.py",
+      "start_line": 12,
+      "end_line": null,
+      "evidence": "aws_key = \"[redacted-token]EXAMP\"",
+      "remediation": "Why it matters: A credential matching a known service format was detected.\nPotential consequences: A working credential in an attacker's hands allows direct access to the linked service under your identity.\nRecommended fix: Revoke and rotate the credential immediately, remove it from the code and git history, and load it from a secret manager or environment at runtime. For git history remediation use the service's documented revocation flow first.\nReferences: https://owasp.org/www-project-top-ten/2023/A07_2023-Identification_and_Authentication_Failures",
+      "score": 0,
+      "score_factors": [],
+      "status": "open",
+      "metadata": {},
+      "occurrences": [
+        {
+          "scanner": "gitleaks",
+          "rule_id": "aws-access-token",
+          "file_path": "config/settings.py",
+          "start_line": 12,
+          "end_line": null,
+          "evidence": "aws_key = \"[redacted-token]EXAMP\"",
+          "message": "AWS Access Key",
+          "metadata": {}
+        }
+      ]
+    },
+    {
+      "id": "fff6dc51b4444c39953892b11723aee4",
+      "fingerprint": "fp2:0d6e0d57aa522c8579a2d04430e076b6",
+      "scanner": "semgrep",
+      "rule_id": "python.lang.security.audit.hardcoded-password-string",
+      "severity": "medium",
+      "raw_severity": "WARNING",
+      "confidence": "unknown",
+      "category": "secret",
+      "title": "Detected hardcoded password secret in variable.",
+      "description": "Detected hardcoded password secret in variable.",
+      "file_path": "app/jobs.py",
+      "start_line": 41,
+      "end_line": null,
+      "evidence": "DB_PASS = \"pla…ed\" [redacted]",
+      "remediation": "Why it matters: A credential appears to be embedded in source code. Anything committed to a repository must be treated as public.\nPotential consequences: Anyone with repository access (or access to git history) obtains the credential; secret scanning on public platforms will flag it.\nRecommended fix: Remove the literal, move the value to an environment variable or a secret manager, and rotate the credential — removing the code does not remove it from git history. Consider history rewriting only with a coordinated plan; rotation is the reliable fix.\nSecure pattern: API_KEY = os.environ[\"API_KEY\"]  # injected at runtime\nReferences: https://owasp.org/www-project-top-ten/2023/A07_2023-Identification_and_Authentication_Failures",
+      "score": 0,
+      "score_factors": [],
+      "status": "open",
+      "metadata": {},
+      "occurrences": [
+        {
+          "scanner": "semgrep",
+          "rule_id": "python.lang.security.audit.hardcoded-password-string",
+          "file_path": "app/jobs.py",
+          "start_line": 41,
+          "end_line": null,
+          "evidence": "DB_PASS = \"pla…ed\" [redacted]",
+          "message": "Detected hardcoded password secret in variable.",
+          "metadata": {}
+        }
+      ]
+    },
+    {
+      "id": "4f707817d58442d2b2fec67d01925857",
+      "fingerprint": "fp2:80b35b6c0e4d19e541cc2cf737b5c454",
+      "scanner": "bandit",
+      "rule_id": "B101",
+      "severity": "low",
+      "raw_severity": "LOW",
+      "confidence": "unknown",
+      "category": "sast",
+      "title": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "file_path": "app/validate.py",
+      "start_line": 22,
+      "end_line": null,
+      "evidence": "assert token is not None",
+      "remediation": "Why it matters: Static analysis flagged this code pattern as risky.\nPotential consequences: Depends on the rule; review the scanner description and references for the specific risk.\nRecommended fix: Review the flagged location, confirm whether the risk applies, and apply the scanner's suggested remediation.",
+      "score": 0,
+      "score_factors": [],
+      "status": "open",
+      "metadata": {},
+      "occurrences": [
+        {
+          "scanner": "bandit",
+          "rule_id": "B101",
+          "file_path": "app/validate.py",
+          "start_line": 22,
+          "end_line": null,
+          "evidence": "assert token is not None",
+          "message": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+          "metadata": {}
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "This is a SYNTHETIC example produced by scripts/generate_examples.py to illustrate report structure. It is not a real scan."
+  ]
+}
