@@ -268,3 +268,53 @@ def test_doctor_runs(tmp_path):
     assert result.exit_code == 0, result.output
     assert "python" in result.output
     assert "database" in result.output
+
+
+def test_scan_label_and_findings_rule_filter(tmp_path, monkeypatch):
+    args, db_path = _db_args(tmp_path)
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runner.invoke(app, [*args, "init", str(repo)])
+    import patchledger.pipeline as pipeline
+
+    monkeypatch.setattr(
+        pipeline, "run_all_scanners",
+        lambda config, target, enabled=None: [
+            _fake_outcome(rule="unique-rule-x"),
+            _fake_outcome(rule="other-rule"),
+        ],
+    )
+    result = runner.invoke(app, [*args, "scan", str(repo), "--label", "nightly"])
+    assert result.exit_code in (0, 2), result.output
+
+    result = runner.invoke(app, [*args, "findings", "--rule", "unique-rule-x", "--json"])
+    assert result.exit_code == 0
+    payload = json.loads(result.stdout)
+    assert len(payload) == 1
+    assert payload[0]["rule_id"] == "unique-rule-x"
+
+
+def test_export_ai_min_severity(tmp_path, monkeypatch):
+    args, db_path = _db_args(tmp_path)
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runner.invoke(app, [*args, "init", str(repo)])
+    import patchledger.pipeline as pipeline
+
+    monkeypatch.setattr(
+        pipeline, "run_all_scanners",
+        lambda config, target, enabled=None: [
+            _fake_outcome(rule="high-one", severity="ERROR"),
+            _fake_outcome(rule="low-one", severity="NOTE"),
+        ],
+    )
+    runner.invoke(app, [*args, "scan", str(repo), "--fail-on", "critical"])
+
+    out = tmp_path / "prompt.md"
+    result = runner.invoke(
+        app, [*args, "export-ai", "--output", str(out), "--min-severity", "high"]
+    )
+    assert result.exit_code == 0, result.output
+    content = out.read_text(encoding="utf-8")
+    assert "high-one" in content
+    assert "low-one" not in content
