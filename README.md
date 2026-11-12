@@ -39,10 +39,13 @@ patchledger init && patchledger scan .
 </div>
 
 > [!TIP]
-> **Reviewing findings with an AI assistant or a colleague?** Run
-> `patchledger export-ai` — it generates a reviewer-ready prompt with the
-> evidence, the questions, and explicit constraints against inventing facts.
-> Fully offline; bring your own reviewer.
+> **AI agents and LLMs:** start with [llms.txt](llms.txt) for a concise map of
+> this repository, or [llms-full.txt](llms-full.txt) for the README and all
+> documentation combined into one file.
+>
+> **Reviewing findings with a human colleague?** Run `patchledger export-ai` —
+> it generates a reviewer-ready prompt with the evidence, the questions, and
+> explicit constraints against inventing facts. Fully offline.
 
 ## Table of Contents
 
@@ -61,6 +64,8 @@ patchledger init && patchledger scan .
 - [Architecture](#architecture)
 - [Documentation](#documentation)
 - [Safety, scope, and limitations](#safety-scope-and-limitations)
+- [Acknowledgements](#acknowledgements)
+- [Community and support](#community-and-support)
 - [Common questions](#common-questions)
 - [License](#license)
 
@@ -111,29 +116,19 @@ an audit trail and rendered into reports.
 ## PatchLedger in action
 
 Real output from a scan of a deliberately vulnerable fixture repository
-([tests/fixtures/demo_repo](tests/fixtures/demo_repo)):
+([tests/fixtures/demo_repo](tests/fixtures/demo_repo)) — note the honest
+`unavailable` row, the merged duplicates, and the explainable scores:
 
-```
-$ patchledger scan ./demo_repo
-┏━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ Tool      ┃ Status      ┃ Version   ┃ Note                        ┃
-┡━━━━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ semgrep   │ ran         │ 1.185.0   │                             │
-│ gitleaks  │ unavailable │ —         │ not found on PATH           │
-│ bandit    │ ran         │ 1.9.4     │                             │
-│ pip-audit │ ran         │ 2.10.1    │                             │
-└───────────┴─────────────┴───────────┴─────────────────────────────┘
-Scan 86d9e807 stored: 9 findings, 2 duplicates merged
+![PatchLedger scan and findings in the terminal](assets/terminal-demo.png)
 
+```bash
 $ patchledger verify
   FIXED VERIFIED  fp2:56e15c…  all reporting scanners ran successfully
   INCONCLUSIVE    fp2:91ac…   scanner gitleaks did not run
 ```
 
-The `unavailable` row is the point: PatchLedger tells you exactly what
-coverage you have instead of pretending. Generated example reports (JSON,
-Markdown, HTML) with clearly labelled synthetic data are in
-[`examples/`](examples/).
+Generated example reports (JSON, Markdown, HTML) with clearly labelled
+synthetic data are in [`examples/`](examples/).
 
 ## Quick start
 
@@ -145,6 +140,14 @@ Markdown, HTML) with clearly labelled synthetic data are in
 - Any standard installer (pipx, pip, uv)
 - Scanners are **optional**: install what you want, PatchLedger reports what
   is missing (see [docs/installation.md](docs/installation.md))
+
+> [!WARNING]
+> PatchLedger runs security scanners that execute code analysis against the
+> target. Run it only against repositories you own or are explicitly
+> authorized to assess, and sandbox scans of untrusted code — some scanners
+> inherently execute project code (for example, dependency resolution can
+> build sdists). See
+> [Safety, scope, and limitations](#safety-scope-and-limitations).
 
 <a id="install-and-first-scan"></a>
 
@@ -182,17 +185,28 @@ patchledger scan . --fail-on high --strict
 
 ## Key capabilities
 
-| Capability | What it means |
-|------------|---------------|
-| **Honest coverage** | Every scan records which tools ran, failed, or were missing; reports are labelled incomplete when coverage isn't full. |
-| **Stable fingerprints** | Versioned `fp2` identity — stable across line shifts, new exactly when the flagged code changes. |
-| **Evidence-based verification** | `fixed_verified` / `still_present` / `reintroduced` / `inconclusive`, each with recorded reasons and caveats. |
-| **Explainable scores** | Deterministic 0–100 with every adjustment listed; never invents CVSS. |
-| **Scan history & diffs** | Immutable scans, new/persistent/reintroduced/changed diffs, status audit trail in local SQLite. |
-| **Remediation knowledge** | Offline guidance per rule family: explanation, consequences, fix, secure pattern. |
-| **Offline review prompts** | `export-ai` builds a reviewer-ready prompt with anti-fabrication constraints. |
-| **Secret redaction** | Credential material redacted on ingest — before storage or rendering. |
-| **Four report formats** | JSON, Markdown, self-contained dark HTML (no JavaScript), SARIF 2.1.0 output. |
+- **No proof, no "fixed"**: findings are only marked resolved when the
+  scanners that detected them ran successfully against the same target —
+  eliminating false-resolution noise from your backlog.
+- **Honest scan coverage**: every scan records which tools ran, failed, or
+  were missing; reports are labelled incomplete when coverage isn't full.
+- **Stable fingerprints**: versioned `fp2` identity — stable across line
+  shifts and formatter runs, new exactly when the flagged code changes.
+- **Explainable scores**: deterministic 0–100 with every adjustment listed;
+  never invents CVSS, never escalates severity on its own.
+- **Scan history & diffs**: immutable scans, new/persistent/reintroduced/
+  changed diffs, and a status audit trail in local SQLite.
+- **Secret redaction**: credential material is redacted on ingest — before
+  storage or rendering. Redaction is hygiene; rotation is the fix.
+- **Offline review prompts**: `export-ai` builds a reviewer-ready prompt with
+  anti-fabrication constraints, for any AI assistant or a human reviewer.
+- **Local remediation knowledge**: guidance per rule family — explanation,
+  consequences, fix, secure pattern — no network, no AI API.
+- **Multi-format reports**: JSON, Markdown, self-contained dark HTML (no
+  JavaScript), and SARIF 2.1.0 for GitHub code scanning.
+- **Private by design**: runs on your machine, stores results locally, and
+  makes zero network calls after installation (pip-audit's advisory-DB
+  queries excepted).
 
 ## Supported scanners
 
@@ -212,26 +226,68 @@ patchledger scan . --fail-on high --strict
 ### GitHub Actions
 
 Copy the ready-made workflow from
-[`docs/example-workflow.md`](docs/example-workflow.md) into your repository:
+[`docs/example-workflow.md`](docs/example-workflow.md) into your repository.
+It runs on push and pull requests, gates on severity, and uploads reports:
 
 ```yaml
-- name: Run security scan
-  run: |
-    patchledger init
-    patchledger scan . --fail-on high
+name: PatchLedger security scan
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PatchLedger (pinned)
+        run: pip install "patchledger @ git+https://github.com/navairgap/patchledger@v0.1.1"
+
+      - name: Run security scan
+        run: |
+          patchledger init
+          patchledger scan . --fail-on high
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: patchledger-report
+          path: patchledger-report-*
+          if-no-files-found: ignore
 ```
 
-Push/PR triggers, severity thresholds, `--strict` incomplete-scan mode, and
-report artifacts — documented in the guide. PatchLedger's own CI runs the
-test matrix on Python 3.10–3.14 plus lint, type-check, and a wheel smoke test
+The scan exits `2` when findings meet the severity threshold (failing the
+job) and `3` on incomplete scans with `--strict` — so a broken scan is never
+mistaken for a clean one. PatchLedger's own CI runs the test matrix on Python
+3.10–3.14 plus lint, type-check, and a wheel smoke test
 ([.github/workflows/ci.yml](.github/workflows/ci.yml)).
 
 ## Architecture
 
-```
-Scan/import ──► Normalize ──► Fingerprint (fp2) ──► Dedup ──► Score ──► SQLite ledger
-                                                                    │
-        Report (JSON · MD · HTML · SARIF) ◄── Verify ◄── Compare ◄──┘
+```mermaid
+flowchart TD
+    REPO["Repository (your code, local)"] --> RUN["Scanner runner<br/>(semgrep · gitleaks · bandit · pip-audit · trivy)"]
+    RUN -->|"missing tools recorded honestly"| PARSE["Parsers<br/>(SARIF 2.1.0 · semgrep · gitleaks · bandit · pip-audit)"]
+    PARSE --> NORM["Normalizer<br/>(severity maps · redaction · categories · remediation KB)"]
+    NORM --> FP["Fingerprints (fp2)"]
+    FP --> DEDUP["Deduplication<br/>(occurrences preserved)"]
+    DEDUP --> SCORE["Scoring (explainable)"]
+    SCORE --> DB[("SQLite ledger<br/>(immutable scans · audit trail)")]
+    DB --> CMP["Scan comparison"]
+    DB --> VER["Patch verification<br/>(coverage-aware)"]
+    DB --> REP["Reports<br/>(JSON · MD · HTML · SARIF)"]
+    CMP --> VER
 ```
 
 Three runtime dependencies (`typer`, `pydantic`, `rich`), no server, no
@@ -261,8 +317,48 @@ rationale, verification semantics, storage schema — is documented in
   repo scripts, but some scanners inherently do (e.g. pip-audit resolving
   dependencies can build sdists). Sandbox untrusted-target scans.
 - Redaction is heuristic, not a guarantee — rotate leaked credentials.
+- Findings still deserve human review: severity mapping is explicit but
+  static analysis has false positives on every tool.
 - Full threat model and honest limits:
   [docs/security-model.md](docs/security-model.md).
+
+## Acknowledgements
+
+PatchLedger stands on the scanners it orchestrates and the libraries it is
+built with:
+
+- [Semgrep](https://github.com/semgrep/semgrep) ·
+  [Bandit](https://github.com/PyCQA/bandit) ·
+  [pip-audit](https://github.com/pypa/pip-audit) ·
+  [gitleaks](https://github.com/gitleaks/gitleaks) ·
+  [Trivy](https://github.com/aquasecurity/trivy)
+- The [PyPI Advisory Database](https://github.com/pypa/advisory-database)
+  behind pip-audit
+- [Typer](https://github.com/fastapi/typer) ·
+  [Pydantic](https://github.com/pydantic/pydantic) ·
+  [Rich](https://github.com/Textualize/rich)
+
+## Community and support
+
+- **Questions & ideas**: open a
+  [Discussion](https://github.com/navairgap/patchledger/discussions)
+- **Bugs**: [open an issue](https://github.com/navairgap/patchledger/issues)
+  with the scanner-coverage table included
+- **Security issues**: report privately per
+  [SECURITY.md](SECURITY.md)
+
+If PatchLedger saved you from a false "resolved" or made your triage easier,
+consider giving the repo a ⭐ — it genuinely helps others find it.
+
+<p align="center">
+  <a href="https://star-history.com/#navairgap/patchledger&Date">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=navairgap/patchledger&type=Date&theme=dark">
+      <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=navairgap/patchledger&type=Date">
+      <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=navairgap/patchledger&type=Date" width="480">
+    </picture>
+  </a>
+</p>
 
 ## Common questions
 
