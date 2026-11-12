@@ -39,3 +39,11 @@ install to `pip install patchledger`.
 - Verify the GitHub Release page renders notes and assets.
 - Update the website roadmap section if the release changed status claims.
 - Announce with a link to the changelog, not to a marketing claim.
+
+## Repository social preview
+
+The share card shown when the repository link is posted anywhere lives at
+[assets/social-preview.png](../assets/social-preview.png) (1280×640). GitHub
+has no API for uploading it: set it manually once via
+**Settings → General → Social preview → Edit**. If the banner design changes,
+regenerate the card with `scripts/generate_banner.py` and re-upload.

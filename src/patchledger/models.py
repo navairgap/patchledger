@@ -91,16 +91,6 @@ class ScanSource(str, Enum):
     IMPORT = "import"  # produced by `patchledger import` from report files
 
 
-class Location(BaseModel):
-    """A file location referenced by a finding."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    file_path: str
-    start_line: int | None = None
-    end_line: int | None = None
-
-
 class Occurrence(BaseModel):
     """One scanner's sighting of a finding within one scan."""
 

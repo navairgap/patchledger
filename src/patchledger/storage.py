@@ -257,16 +257,6 @@ class PatchLedgerDB:
         except sqlite3.Error as exc:
             raise StorageError(f"Cannot ensure project record: {exc}") from exc
 
-    def get_project(self, project_id: str) -> Project:
-        row = self._conn.execute(
-            "SELECT * FROM projects WHERE id = ?", (project_id,)
-        ).fetchone()
-        if not row:
-            raise StorageError(f"Project {project_id} not found")
-        return Project(
-            id=row["id"], name=row["name"], root_path=row["root_path"], created_at=row["created_at"]
-        )
-
     def list_projects(self) -> list[Project]:
         rows = self._conn.execute("SELECT * FROM projects ORDER BY created_at ASC").fetchall()
         return [
@@ -429,16 +419,6 @@ class PatchLedgerDB:
             scans.append(_row_to_scan(row, tools))
         return scans
 
-    def latest_scan(self, project_id: str) -> Scan | None:
-        scans = self.list_scans(project_id)
-        return scans[-1] if scans else None
-
-    def count_scans(self, project_id: str) -> int:
-        row = self._conn.execute(
-            "SELECT COUNT(*) AS n FROM scans WHERE project_id = ?", (project_id,)
-        ).fetchone()
-        return int(row["n"])
-
     # -------------------------------------------------------------- findings
     def get_findings(self, scan_id: str) -> list[Finding]:
         """Findings of one scan, ordered by severity rank, score, path."""
@@ -511,17 +491,6 @@ class PatchLedgerDB:
         ).fetchall()
         return [dict(row) for row in rows]
 
-    def project_fingerprints(self, project_id: str) -> set[str]:
-        rows = self._conn.execute(
-            """
-            SELECT DISTINCT f.fingerprint FROM findings f
-            JOIN scans s ON s.id = f.scan_id
-            WHERE s.project_id = ?
-            """,
-            (project_id,),
-        ).fetchall()
-        return {row["fingerprint"] for row in rows}
-
     # -------------------------------------------------------- status history
     def record_status(
         self,
@@ -578,13 +547,3 @@ class PatchLedgerDB:
             (project_id,),
         ).fetchall()
         return {row["fingerprint"]: dict(row) for row in rows}
-
-    def update_finding_status(self, finding_id: str, status: FindingStatus) -> None:
-        """Update the stored status on a finding row (with FK enforcement)."""
-        try:
-            with self._conn:
-                self._conn.execute(
-                    "UPDATE findings SET status = ? WHERE id = ?", (status.value, finding_id)
-                )
-        except sqlite3.Error as exc:
-            raise StorageError(f"Cannot update finding status: {exc}") from exc

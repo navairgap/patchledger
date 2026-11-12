@@ -38,10 +38,6 @@ class ScanDiff:
     compatible: bool = True
     notes: list[str] = field(default_factory=list)
 
-    @property
-    def has_changes(self) -> bool:
-        return bool(self.new or self.resolved_candidates or self.reintroduced)
-
     def summary(self) -> dict[str, int]:
         return {
             "new": len(self.new),

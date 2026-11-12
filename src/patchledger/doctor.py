@@ -15,8 +15,6 @@ from patchledger.config import PatchLedgerConfig
 from patchledger.scanner import _VERSION_ARGS, discover_tool, get_tool_version
 from patchledger.storage import PatchLedgerDB
 
-KNOWN_SCANNERS = ["semgrep", "gitleaks", "bandit", "pip-audit", "trivy"]
-
 
 @dataclass
 class Check:

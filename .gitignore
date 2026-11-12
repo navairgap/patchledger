@@ -33,3 +33,6 @@ patchledger.db
 # OS artifacts
 .DS_Store
 Thumbs.db
+
+# generated banner SVGs (regenerate via scripts/generate_banner.py)
+website/assets/banner-pixel-*.svg
