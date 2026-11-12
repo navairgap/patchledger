@@ -2,6 +2,11 @@
 
 **Find it. Understand it. Fix it. Prove it.**
 
+[![CI](https://github.com/navairgap/patchledger/actions/workflows/ci.yml/badge.svg)](https://github.com/navairgap/patchledger/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-3fb968.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.10%2B-539bf5.svg)](pyproject.toml)
+[![Code style: ruff](https://img.shields.io/badge/lint-ruff-261230.svg)](https://github.com/astral-sh/ruff)
+
 An evidence-first, open-source security finding and remediation verification
 platform for developers.
 
