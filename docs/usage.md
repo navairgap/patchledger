@@ -28,6 +28,7 @@ patchledger scan .                       # default threshold from config (high)
 patchledger scan . --fail-on medium      # CI gate: exit 2 on medium+ findings
 patchledger scan . --strict              # exit 3 when the scan is incomplete
 patchledger scan . --scanner bandit --scanner pip-audit   # override tool list
+patchledger scan . --label "nightly-42"  # label the stored scan
 ```
 
 After scanning, PatchLedger prints the honest tool-coverage table, the stored
@@ -62,6 +63,7 @@ patchledger findings
 patchledger findings --severity high          # at or above high
 patchledger findings --status inconclusive    # not confirmed fixed
 patchledger findings --scanner semgrep
+patchledger findings --rule B602              # rule-id substring filter
 patchledger findings --json                   # machine-readable
 ```
 
@@ -91,10 +93,14 @@ section when a previous scan exists).
 patchledger report --format html --output report.html
 patchledger report --format markdown
 patchledger report --format json --scan 63c0fe0d
+patchledger report --format sarif       # GitHub code scanning ingest
 ```
 
 The HTML report is a single self-contained file: dark theme, no JavaScript,
-Content-Security-Policy included, all dynamic content escaped.
+Content-Security-Policy included, all dynamic content escaped. The SARIF
+export carries normalized severity plus raw severity in properties,
+patchledger fingerprints as partialFingerprints, and coverage honesty as
+tool notifications.
 
 ### `patchledger export-ai`
 
@@ -105,6 +111,7 @@ reviewer (human or AI).
 
 ```bash
 patchledger export-ai --output review-prompt.md --max-findings 25
+patchledger export-ai --min-severity high   # prioritize the review scope
 ```
 
 ### `patchledger doctor`
