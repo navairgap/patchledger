@@ -294,17 +294,25 @@ _VERSION_ARGS = {
 
 
 def collect_git_metadata(target: Path) -> tuple[str | None, str | None]:
-    """Return (commit, branch) for the target if it is a git repository."""
+    """Return (commit, branch) for the target if it is a git repository.
+
+    The git binary is resolved once to an absolute path and pinned as
+    argv[0] — same discipline as the scanners (also silences bandit B607,
+    a finding our own dogfood scan surfaced).
+    """
     commit = branch = None
+    git_path = shutil.which("git")
+    if not git_path:
+        return commit, branch
     try:
         proc = subprocess.run(
-            ["git", "-C", str(target), "rev-parse", "HEAD"],
+            [git_path, "-C", str(target), "rev-parse", "HEAD"],
             capture_output=True, text=True, timeout=10, check=False,
         )
         if proc.returncode == 0:
             commit = proc.stdout.strip() or None
         proc = subprocess.run(
-            ["git", "-C", str(target), "rev-parse", "--abbrev-ref", "HEAD"],
+            [git_path, "-C", str(target), "rev-parse", "--abbrev-ref", "HEAD"],
             capture_output=True, text=True, timeout=10, check=False,
         )
         if proc.returncode == 0:
