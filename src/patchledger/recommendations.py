@@ -306,6 +306,77 @@ _KB: list[tuple[tuple[str, ...], Recommendation]] = [
             references=(),
         ),
     ),
+    (
+        ("cors", "allow-origin", "wildcard-origin", "access-control"),
+        Recommendation(
+            category="config",
+            explanation="Cross-origin access appears to be granted with a "
+            "wildcard (or reflected) origin, letting any website read the "
+            "API's responses from a victim's browser.",
+            consequences="Credential-bearing cross-site requests become "
+            "readable by attacker-controlled origins; combined with cookies "
+            "this enables data theft without XSS.",
+            fix="Enumerate the origins that genuinely need access and "
+            "configure them explicitly; never combine a wildcard origin with "
+            "credential support. Reflect the Origin header only after "
+            "validating it against an allowlist.",
+            secure_pattern=(
+                "CORSMiddleware(app, allow_origins=['https://app.example.com'], "
+                "allow_credentials=True)"
+            ),
+            references=(),
+        ),
+    ),
+    (
+        ("ssl-version", "insecure-protocol", "b502", "b503", "b504",
+         "tls-version", "weak-tls", "ssl-context"),
+        Recommendation(
+            category="crypto",
+            explanation="A TLS protocol version or cipher policy from the "
+            "pre-TLS-1.2 era is selected explicitly.",
+            consequences="Downgrade and legacy-protocol attacks (POODLE, "
+            "BEAST-era issues) become possible against the connection.",
+            fix="Do not pin legacy versions: use the default TLS settings of "
+            "a current standard library, or explicitly require TLS 1.2+ with "
+            "a modern cipher suite.",
+            secure_pattern=("ctx = ssl.create_default_context()  # TLS 1.2+ defaults"),
+            references=(),
+        ),
+    ),
+    (
+        ("try-except-pass", "b110", "swallow", "except-pass"),
+        Recommendation(
+            category="sast",
+            explanation="An exception handler silently discards the error "
+            "(`except: pass`), hiding failures — including security-relevant "
+            "ones like failed validation or authorization checks.",
+            consequences="Attacker-triggered failures disappear: input "
+            "validation, auth checks or integrity checks can be bypassed "
+            "without any trace in logs.",
+            fix="Handle the specific exception types expected and log or "
+            "propagate everything else. If a failure is truly benign, say so "
+            "in a comment and log it at debug level.",
+            secure_pattern=(
+                "except ValueError:\n    logger.warning('invalid payload', exc_info=True)"
+            ),
+            references=(),
+        ),
+    ),
+    (
+        ("b101", "assert-used", "assert-for-security"),
+        Recommendation(
+            category="sast",
+            explanation="A Python assert statement is used where a check must "
+            "always run. Asserts are stripped when Python runs with -O, so "
+            "the check silently vanishes in optimized deployments.",
+            consequences="Security validation (authentication, invariants, "
+            "authorization assumptions) disappears in production builds.",
+            fix="Replace assert with an explicit check that raises (and, for "
+            "HTTP contexts, returns a proper error response).",
+            secure_pattern=("if token is None:\n    raise PermissionError('missing token')"),
+            references=(),
+        ),
+    ),
 ]
 
 
