@@ -8,6 +8,19 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- SARIF 2.1.0 **output** (`patchledger report --format sarif`): normalized
+  findings exported for GitHub code scanning and other SARIF consumers, with
+  patchledger fingerprints as partialFingerprints, raw severity preserved in
+  properties, and coverage honesty as tool execution notifications.
+- CLI: `scan --label`, `findings --rule` (rule-id substring filter), and
+  `export-ai --min-severity` (prioritized review scope).
+- Release workflow: pushing a `v*` tag builds, smoke-tests, and publishes a
+  GitHub Release with artifacts (first-party pinned actions only).
+- Remediation knowledge base entries: CORS wildcard origins, legacy TLS
+  protocols (B502–B504), silent exception swallowing (B110), and
+  assert-based validation (B101).
+- Maintainer release guide (`docs/releasing.md`); README status badges.
+
 - Core pipeline: scan → import → normalize → fingerprint → dedup → score →
   store → compare → verify → report.
 - Scanner runner for semgrep, gitleaks, bandit, pip-audit, trivy with honest
