@@ -8,7 +8,7 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./assets/github-banner-dark.png">
   <source media="(prefers-color-scheme: light)" srcset="./assets/github-banner-light.png">
-  <img src="./assets/github-banner-light.png" alt="PatchLedger — Find it. Understand it. Fix it. Prove it." width="100%">
+  <img src="./assets/github-banner-dark.png" alt="PatchLedger — Security findings, verified fixed." width="100%">
 </picture>
 
 ### PatchLedger is an evidence-first security finding and remediation verification platform.
@@ -28,11 +28,11 @@ pipx install patchledger
 patchledger init && patchledger scan .
 ```
 
-<sub><code>patchledger doctor</code> shows exactly which scanners are visible on your machine — missing tools are recorded, never hidden.</sub>
+<sub>The first scan records which of your scanners are visible — missing tools are reported, never hidden.</sub>
 
 ---
 
-<a href="https://navairgap.github.io/patchledger/"><picture><source media="(prefers-color-scheme: dark)" srcset="./assets/github-button-site-dark.png"><source media="(prefers-color-scheme: light)" srcset="./assets/github-button-site-light.png"><img src="./assets/github-button-site-light.png" height="40" alt="Live website"></picture></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://navairgap.github.io/patchledger/#report"><picture><source media="(prefers-color-scheme: dark)" srcset="./assets/github-button-site-dark.png"><source media="(prefers-color-scheme: light)" srcset="./assets/github-button-site-light.png"><img src="./assets/github-button-site-light.png" height="40" alt="See an example report"></picture></a>
+<a href="https://navairgap.github.io/patchledger/"><img src="./assets/github-button-site.png" height="46" alt="Live website"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://navairgap.github.io/patchledger/#report"><img src="./assets/github-button-docs.png" height="46" alt="See an example report"></a>
 
 </div>
 
