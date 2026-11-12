@@ -51,7 +51,7 @@ dev = [
 patchledger = "patchledger.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/navairgap/patchledger"
+Homepage = "https://navairgap.github.io/patchledger/"
 Repository = "https://github.com/navairgap/patchledger"
 Issues = "https://github.com/navairgap/patchledger/issues"
 Changelog = "https://github.com/navairgap/patchledger/blob/main/CHANGELOG.md"
