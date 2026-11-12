@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "patchledger"
-version = "0.1.0"
+version = "0.1.1"
 description = "An evidence-first, open-source security finding and remediation verification platform for developers."
 readme = "README.md"
 license = "MIT"
