@@ -1,0 +1,35 @@
+# PatchLedger
+
+> An evidence-first, open-source security finding and remediation verification platform for developers. Runs established scanners (semgrep, gitleaks, bandit, pip-audit, trivy), normalizes their findings into one persistent SQLite ledger with deterministic fingerprints and explainable risk scores, and verifies that vulnerabilities were actually fixed — with scanner-coverage evidence — before marking them resolved. No AI API, no cloud, no telemetry; fully functional offline.
+
+Key facts:
+
+- Language: Python 3.10+ (tested through 3.14)
+- License: MIT
+- Install: `pipx install patchledger` (or `pip install patchledger`)
+- Core promise: a vanished finding is only `resolved` when every scanner that ever reported it ran successfully against the same target in the newer scan; otherwise it is `inconclusive` with recorded reasons.
+- No AI API required. `patchledger export-ai` generates an offline review prompt for any external assistant.
+- Report formats: JSON, Markdown, self-contained HTML (no JavaScript), SARIF 2.1.0 output.
+
+## Docs
+
+- [Installation](docs/installation.md): per-scanner setup and requirements
+- [Usage handbook](docs/usage.md): every command, flag, and exit code
+- [Architecture](docs/architecture.md): data model, fp2 fingerprints, verification semantics, storage schema
+- [Security model](docs/security-model.md): threat model, guarantees, honest limits
+- [FAQ](docs/faq.md): the no-AI design, fingerprint behavior, sharing reports
+- [Example CI workflow](docs/example-workflow.md): GitHub Actions recipe with severity gates
+- [Releasing](docs/releasing.md): maintainer release process
+
+## CLI commands
+
+- `patchledger init [PATH]`: initialize a project (creates .patchledger/ with config and SQLite database)
+- `patchledger scan [PATH]`: run installed scanners, normalize, dedup, score, store one scan; `--fail-on SEVERITY` (exit 2), `--strict` (exit 3 on incomplete scans), `--scanner NAME` (repeatable), `--label TEXT`
+- `patchledger import FILE...`: import existing reports (SARIF 2.1.0, semgrep JSON, gitleaks JSON, bandit JSON, pip-audit JSON; auto-detected)
+- `patchledger findings`: current per-finding ledger; filters `--severity`, `--status`, `--scanner`, `--rule`; `--json`
+- `patchledger history`: list recorded scans with tool statuses
+- `patchledger compare SCAN_A SCAN_B`: diff two scans
+- `patchledger verify [--baseline ID]`: coverage-aware resolution verification with recorded reasons
+- `patchledger report`: generate JSON, Markdown, self-contained HTML, or SARIF (`--format`)
+- `patchledger export-ai`: offline AI-review prompt (Markdown or JSON); `--min-severity`, `--max-findings`
+- `patchledger doctor`: installation health (python, scanners, config, database)

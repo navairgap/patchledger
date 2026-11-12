@@ -1,0 +1,1041 @@
+> [!NOTE]
+> **New: SARIF output.** `patchledger report --format sarif` now exports the
+> verified ledger for GitHub code scanning and any SARIF 2.1.0 consumer —
+> with patchledger fingerprints, raw severity, and coverage honesty included.
+
+<div align="center">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/banner-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="./assets/banner-light.png">
+  <img src="./assets/banner-dark.png" alt="PatchLedger — Security findings, verified fixed." width="100%">
+</picture>
+
+### PatchLedger is an evidence-first security finding and remediation verification platform.
+
+-Run PatchLedger only against repositories you are authorized to assess-
+
+It runs the scanners you already trust, unifies their findings into one
+persistent, deduplicated ledger — and verifies that a vulnerability was
+actually fixed, with scanner-coverage evidence, before calling it resolved.
+**No proof, no "fixed."**
+
+**This repository is PatchLedger: the full open-source CLI, run locally from
+your command line.**
+
+<p><strong>Launch PatchLedger</strong></p>
+
+```bash
+pipx install patchledger
+patchledger init && patchledger scan .
+```
+
+<sub>The first scan records which of your scanners are visible — missing tools are reported, never hidden.</sub>
+
+---
+
+<a href="https://navairgap.github.io/patchledger/"><img src="./assets/button-site.png" height="46" alt="Live website"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://navairgap.github.io/patchledger/#report"><img src="./assets/button-docs.png" height="46" alt="See an example report"></a>
+
+</div>
+
+> [!TIP]
+> **Reviewing findings with an AI assistant or a colleague?** Run
+> `patchledger export-ai` — it generates a reviewer-ready prompt with the
+> evidence, the questions, and explicit constraints against inventing facts.
+> Fully offline; bring your own reviewer.
+
+## Table of Contents
+
+- [What is PatchLedger?](#what-is-patchledger)
+  - [Why PatchLedger exists](#why-patchledger-exists)
+  - [Why "inconclusive" is a feature](#why-inconclusive-is-a-feature)
+- [PatchLedger in action](#patchledger-in-action)
+- [Quick start](#quick-start)
+  - [Prerequisites](#prerequisites)
+  - [Install and first scan](#install-and-first-scan)
+  - [Verify a fix](#verify-a-fix)
+- [Key capabilities](#key-capabilities)
+- [Supported scanners](#supported-scanners)
+- [Use in CI/CD](#use-in-cicd)
+  - [GitHub Actions](#github-actions)
+- [Architecture](#architecture)
+- [Documentation](#documentation)
+- [Safety, scope, and limitations](#safety-scope-and-limitations)
+- [Acknowledgements](#acknowledgements)
+- [Community and support](#community-and-support)
+- [Common questions](#common-questions)
+- [License](#license)
+
+## What is PatchLedger?
+
+PatchLedger is a local-first CLI that turns scattered scanner output into a
+verifiable remediation ledger. It runs established security scanners against
+your repository (or imports their existing reports), normalizes everything
+into one consistent data model, and tracks every finding across scans — with
+deterministic fingerprints, explainable risk scores, and an audit trail.
+
+The verification step is the core: when a finding stops appearing in scans,
+PatchLedger checks whether the scanners that detected it actually ran
+successfully and covered the same target. Only then is the finding marked
+**resolved**. Anything less is recorded as **inconclusive** — with the exact
+reason attached.
+
+<a id="why-patchledger-exists"></a>
+<details>
+<summary><strong>Why PatchLedger exists</strong></summary>
+
+Teams ship code continuously but verify security fixes rarely — most pipelines
+declare a finding "resolved" the moment it stops appearing in reports, even if
+the scanner never ran, crashed, or didn't cover that file. False "resolved"
+states are how regressions reach production unnoticed.
+
+PatchLedger closes that gap: every scan is an immutable observation point, and
+resolution claims must survive an evidence check. An honest *inconclusive*
+costs one re-run; a false *fixed* costs a breach.
+
+</details>
+
+<a id="why-inconclusive-is-a-feature"></a>
+<details>
+<summary><strong>Why "inconclusive" is a feature</strong></summary>
+
+A finding that disappears from a scan is only a <em>resolution candidate</em>.
+PatchLedger verifies it against the evidence: did every scanner that ever
+reported this fingerprint run successfully in the newer scan, against the same
+target? Imported reports cannot assert coverage, so verifications against them
+stay inconclusive by design. Scanner version changes are recorded as caveats.
+
+Every verification decision — including the reasons and caveats — is stored in
+an audit trail and rendered into reports.
+
+</details>
+
+## PatchLedger in action
+
+Real output from a scan of a deliberately vulnerable fixture repository
+([tests/fixtures/demo_repo](tests/fixtures/demo_repo)) — note the honest
+`unavailable` row, the merged duplicates, and the explainable scores:
+
+![PatchLedger scan and findings in the terminal](assets/terminal-demo.png)
+
+```bash
+$ patchledger verify
+  FIXED VERIFIED  fp2:56e15c…  all reporting scanners ran successfully
+  INCONCLUSIVE    fp2:91ac…   scanner gitleaks did not run
+```
+
+Generated example reports (JSON, Markdown, HTML) with clearly labelled
+synthetic data are in [`examples/`](examples/).
+
+## Quick start
+
+<a id="prerequisites"></a>
+
+### Prerequisites
+
+- Python **3.10+**
+- Any standard installer (pipx, pip, uv)
+- Scanners are **optional**: install what you want, PatchLedger reports what
+  is missing (see [docs/installation.md](docs/installation.md))
+
+> [!WARNING]
+> PatchLedger runs security scanners that execute code analysis against the
+> target. Run it only against repositories you own or are explicitly
+> authorized to assess, and sandbox scans of untrusted code — some scanners
+> inherently execute project code (for example, dependency resolution can
+> build sdists). See
+> [Safety, scope, and limitations](#safety-scope-and-limitations).
+
+<a id="install-and-first-scan"></a>
+
+### Install and first scan
+
+```bash
+pipx install patchledger          # or: pip install patchledger
+
+cd your-project
+patchledger init                  # creates .patchledger/ (config + ledger db)
+patchledger scan .                # runs installed scanners
+patchledger findings              # the live finding ledger
+patchledger history               # every recorded scan
+```
+
+<a id="verify-a-fix"></a>
+
+### Verify a fix
+
+```bash
+# ...fix the code...
+
+patchledger scan .                # re-scan
+patchledger verify                # proof — or an honest "inconclusive"
+patchledger report --format html  # self-contained report
+patchledger report --format sarif # GitHub code scanning ingest
+```
+
+CI gate for any repository:
+
+```bash
+patchledger scan . --fail-on high --strict
+# exit 2: findings at/above high · exit 3: incomplete scan (with --strict)
+```
+
+## Key capabilities
+
+- **No proof, no "fixed"**: findings are only marked resolved when the
+  scanners that detected them ran successfully against the same target —
+  eliminating false-resolution noise from your backlog.
+- **Honest scan coverage**: every scan records which tools ran, failed, or
+  were missing; reports are labelled incomplete when coverage isn't full.
+- **Stable fingerprints**: versioned `fp2` identity — stable across line
+  shifts and formatter runs, new exactly when the flagged code changes.
+- **Explainable scores**: deterministic 0–100 with every adjustment listed;
+  never invents CVSS, never escalates severity on its own.
+- **Scan history & diffs**: immutable scans, new/persistent/reintroduced/
+  changed diffs, and a status audit trail in local SQLite.
+- **Secret redaction**: credential material is redacted on ingest — before
+  storage or rendering. Redaction is hygiene; rotation is the fix.
+- **Offline review prompts**: `export-ai` builds a reviewer-ready prompt with
+  anti-fabrication constraints, for any AI assistant or a human reviewer.
+- **Local remediation knowledge**: guidance per rule family — explanation,
+  consequences, fix, secure pattern — no network, no AI API.
+- **Multi-format reports**: JSON, Markdown, self-contained dark HTML (no
+  JavaScript), and SARIF 2.1.0 for GitHub code scanning.
+- **Private by design**: runs on your machine, stores results locally, and
+  makes zero network calls after installation (pip-audit's advisory-DB
+  queries excepted).
+
+## Supported scanners
+
+| Scanner   | Adds                                  | Import formats     |
+|-----------|---------------------------------------|--------------------|
+| semgrep   | Broad community SAST rules            | JSON, SARIF        |
+| bandit    | Python-specific issues                | JSON, SARIF        |
+| pip-audit | Dependency vulnerabilities            | JSON, SARIF        |
+| gitleaks  | Secrets in tree and git history       | JSON, SARIF        |
+| trivy     | Filesystem vulnerabilities            | SARIF              |
+| any tool  | Anything emitting SARIF 2.1.0         | SARIF              |
+
+## Use in CI/CD
+
+<a id="github-actions"></a>
+
+### GitHub Actions
+
+Copy the ready-made workflow from
+[`docs/example-workflow.md`](docs/example-workflow.md) into your repository.
+It runs on push and pull requests, gates on severity, and uploads reports:
+
+```yaml
+name: PatchLedger security scan
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PatchLedger (pinned)
+        run: pip install "patchledger @ git+https://github.com/navairgap/patchledger@v0.1.1"
+
+      - name: Run security scan
+        run: |
+          patchledger init
+          patchledger scan . --fail-on high
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: patchledger-report
+          path: patchledger-report-*
+          if-no-files-found: ignore
+```
+
+The scan exits `2` when findings meet the severity threshold (failing the
+job) and `3` on incomplete scans with `--strict` — so a broken scan is never
+mistaken for a clean one. PatchLedger's own CI runs the test matrix on Python
+3.10–3.14 plus lint, type-check, and a wheel smoke test
+([.github/workflows/ci.yml](.github/workflows/ci.yml)).
+
+## Architecture
+
+```mermaid
+flowchart TD
+    REPO["Repository (your code, local)"] --> RUN["Scanner runner<br/>(semgrep · gitleaks · bandit · pip-audit · trivy)"]
+    RUN -->|"missing tools recorded honestly"| PARSE["Parsers<br/>(SARIF 2.1.0 · semgrep · gitleaks · bandit · pip-audit)"]
+    PARSE --> NORM["Normalizer<br/>(severity maps · redaction · categories · remediation KB)"]
+    NORM --> FP["Fingerprints (fp2)"]
+    FP --> DEDUP["Deduplication<br/>(occurrences preserved)"]
+    DEDUP --> SCORE["Scoring (explainable)"]
+    SCORE --> DB[("SQLite ledger<br/>(immutable scans · audit trail)")]
+    DB --> CMP["Scan comparison"]
+    DB --> VER["Patch verification<br/>(coverage-aware)"]
+    DB --> REP["Reports<br/>(JSON · MD · HTML · SARIF)"]
+    CMP --> VER
+```
+
+Three runtime dependencies (`typer`, `pydantic`, `rich`), no server, no
+telemetry, no network after installation. The full design — fingerprint
+rationale, verification semantics, storage schema — is documented in
+[docs/architecture.md](docs/architecture.md).
+
+## Documentation
+
+| Document | Contents |
+|----------|----------|
+| [Installation](docs/installation.md) | Per-scanner setup and requirements |
+| [Usage handbook](docs/usage.md) | Every command, flag, and exit code |
+| [Architecture](docs/architecture.md) | Data model, fingerprints, verification semantics |
+| [Security model](docs/security-model.md) | Threat model, guarantees, honest limits |
+| [FAQ](docs/faq.md) | The no-AI design, fingerprint behavior, sharing reports |
+| [Releasing](docs/releasing.md) | Maintainer release process |
+
+## Safety, scope, and limitations
+
+- PatchLedger scans repositories **you are authorized to assess** and never
+  transmits your code anywhere.
+- It never downloads or executes scanner binaries on its own, never
+  automatically modifies your files, and never suppresses findings without
+  explicit configuration.
+- **Scanning untrusted repositories:** PatchLedger itself does not execute
+  repo scripts, but some scanners inherently do (e.g. pip-audit resolving
+  dependencies can build sdists). Sandbox untrusted-target scans.
+- Redaction is heuristic, not a guarantee — rotate leaked credentials.
+- Findings still deserve human review: severity mapping is explicit but
+  static analysis has false positives on every tool.
+- Full threat model and honest limits:
+  [docs/security-model.md](docs/security-model.md).
+
+## Acknowledgements
+
+PatchLedger stands on the scanners it orchestrates and the libraries it is
+built with:
+
+- [Semgrep](https://github.com/semgrep/semgrep) ·
+  [Bandit](https://github.com/PyCQA/bandit) ·
+  [pip-audit](https://github.com/pypa/pip-audit) ·
+  [gitleaks](https://github.com/gitleaks/gitleaks) ·
+  [Trivy](https://github.com/aquasecurity/trivy)
+- The [PyPI Advisory Database](https://github.com/pypa/advisory-database)
+  behind pip-audit
+- [Typer](https://github.com/fastapi/typer) ·
+  [Pydantic](https://github.com/pydantic/pydantic) ·
+  [Rich](https://github.com/Textualize/rich)
+
+## Community and support
+
+- **Questions & ideas**: open a
+  [Discussion](https://github.com/navairgap/patchledger/discussions)
+- **Bugs**: [open an issue](https://github.com/navairgap/patchledger/issues)
+  with the scanner-coverage table included
+- **Security issues**: report privately per
+  [SECURITY.md](SECURITY.md)
+
+If PatchLedger saved you from a false "resolved" or made your triage easier,
+consider giving the repo a ⭐ — it genuinely helps others find it.
+
+<p align="center">
+  <a href="https://star-history.com/#navairgap/patchledger&Date">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=navairgap/patchledger&type=Date&theme=dark">
+      <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=navairgap/patchledger&type=Date">
+      <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=navairgap/patchledger&type=Date" width="480">
+    </picture>
+  </a>
+</p>
+
+## Common questions
+
+**Does PatchLedger need an AI API?**
+No. The entire engine is deterministic and offline. `export-ai` generates a
+prompt you can paste into any assistant — the tool itself never calls one.
+A bring-your-own-key integration may arrive later as an optional extension.
+
+**Does it output SARIF?**
+Yes — `patchledger report --format sarif` emits SARIF 2.1.0 with
+patchledger fingerprints as `partialFingerprints`, raw severity in
+properties, and coverage honesty as tool notifications.
+
+**Why didn't my disappeared finding get marked "fixed"?**
+Verification requires that every scanner which ever reported the finding ran
+successfully against the same target in the newer scan. Missing tools, failed
+runs, and imported reports produce `inconclusive` with the reason recorded.
+Re-run the missing scanner and rescan.
+
+**Can findings from different scanners be merged?**
+No — fingerprints include scanner identity on purpose. Merging semgrep and
+bandit sightings would destroy the per-tool evidence that verification
+depends on.
+
+**Can I run it fully offline?**
+Yes. The only outbound network use is pip-audit querying the PyPI advisory
+database.
+
+## License
+
+[MIT](LICENSE) © 2026 navairgap and PatchLedger contributors.
+
+---
+
+# docs/installation.md
+
+# Installation
+
+PatchLedger is a local CLI tool. It has no server, no telemetry, and no
+network requirement after installation (except pip-audit, which queries the
+PyPI advisory database).
+
+## Requirements
+
+- Python **3.10+** (tested through 3.14)
+- pip / pipx / uv — any standard installer works
+
+## Install PatchLedger
+
+```bash
+# Recommended: isolated CLI install
+pipx install patchledger
+
+# or into your environment
+pip install patchledger
+
+# development install from a checkout
+git clone https://github.com/navairgap/patchledger
+cd patchledger
+pip install -e ".[dev]"
+```
+
+Once published to PyPI, the version above is the stable path. Until then,
+install from a pinned git ref:
+
+```bash
+pip install "patchledger @ git+https://github.com/navairgap/patchledger@v0.1.0"
+```
+
+## Install scanners (optional, per-scanner)
+
+PatchLedger works with whatever is installed and **reports honestly what is
+missing**. Install any of these to widen coverage:
+
+| Scanner   | Install                            | Adds                                          |
+|-----------|------------------------------------|-----------------------------------------------|
+| bandit    | `pip install bandit`               | Python SAST findings                          |
+| pip-audit | `pip install pip-audit`            | Known vulnerabilities in Python dependencies  |
+| semgrep   | `pip install semgrep`              | Broad community SAST rules                    |
+| gitleaks  | system package or [release binary](https://github.com/gitleaks/gitleaks/releases) | Secrets in the working tree / git history |
+| trivy     | system package or [release binary](https://github.com/aquasecurity/trivy/releases) | Filesystem vulnerabilities via SARIF |
+
+Check what PatchLedger can see:
+
+```bash
+patchledger doctor
+```
+
+## Initialize a project
+
+In the repository you want to track (this creates `.patchledger/` with a
+config and SQLite database):
+
+```bash
+cd your-repo
+patchledger init
+```
+
+Add the ledger data to your `.gitignore` (PatchLedger suggests this but never
+edits your files automatically):
+
+```bash
+echo ".patchledger/" >> .gitignore
+```
+
+## Python version support
+
+The package targets Python 3.10+ and is tested on 3.10–3.14 in CI.
+
+# docs/usage.md
+
+# Usage handbook
+
+Every PatchLedger command, every flag, and the exit codes CI relies on.
+
+```
+patchledger [--db PATH] [--debug] COMMAND
+```
+
+| Option    | Meaning                                                        |
+|-----------|----------------------------------------------------------------|
+| `--db`    | Path to the SQLite database (default `.patchledger/patchledger.db`) |
+| `--debug` | Show full tracebacks instead of friendly error messages        |
+
+## Commands
+
+### `patchledger init [PATH]`
+
+Initialize a project: creates `.patchledger/` (config + database) under PATH
+(default `.`). An explicit `--db` puts the database anywhere you like.
+
+### `patchledger scan [PATH]`
+
+Run every enabled scanner that is installed, normalize + dedup + score the
+results, and store one immutable scan.
+
+```bash
+patchledger scan .                       # default threshold from config (high)
+patchledger scan . --fail-on medium      # CI gate: exit 2 on medium+ findings
+patchledger scan . --strict              # exit 3 when the scan is incomplete
+patchledger scan . --scanner bandit --scanner pip-audit   # override tool list
+patchledger scan . --label "nightly-42"  # label the stored scan
+```
+
+After scanning, PatchLedger prints the honest tool-coverage table, the stored
+finding count, and any ledger transitions (resolved / reintroduced /
+inconclusive). A finding only becomes *resolved* when every scanner that ever
+reported it ran successfully in the newer scan on the same target — otherwise
+it is recorded as *inconclusive* (effectively still open).
+
+### `patchledger import FILE...`
+
+Import existing scanner reports as one scan bound to `--target` (default `.`).
+
+```bash
+patchledger import semgrep.json bandit.sarif --target .
+patchledger import results.sarif --label "ci-run-123"
+```
+
+Supported formats (auto-detected from content): SARIF 2.1.0, semgrep JSON,
+gitleaks JSON, bandit JSON, pip-audit JSON.
+
+**Honesty note:** imported scans record their tools with status `imported` —
+they cannot assert local scanner coverage, so resolution verification against
+them is inconclusive by design.
+
+### `patchledger findings`
+
+Show the current per-finding ledger (open / resolved / reintroduced /
+inconclusive), sorted by severity and risk score.
+
+```bash
+patchledger findings
+patchledger findings --severity high          # at or above high
+patchledger findings --status inconclusive    # not confirmed fixed
+patchledger findings --scanner semgrep
+patchledger findings --rule B602              # rule-id substring filter
+patchledger findings --json                   # machine-readable
+```
+
+### `patchledger history`
+
+List every recorded scan: id, timestamp, source (scan/import), tool statuses,
+finding count.
+
+### `patchledger compare SCAN_A SCAN_B`
+
+Diff two scans (ids can be prefixes): new, persistent, resolved candidates,
+reintroduced, changed severity, changed location. Targets that differ are
+flagged as incompatible.
+
+### `patchledger verify [--baseline ID]`
+
+Explicitly verify resolution candidates between the previous scan and the
+latest (or a chosen baseline). Prints per-fingerprint verdicts with reasons
+and caveats, and persists status transitions to the audit trail.
+
+### `patchledger report`
+
+Generate a report for a scan (the latest by default, including a comparison
+section when a previous scan exists).
+
+```bash
+patchledger report --format html --output report.html
+patchledger report --format markdown
+patchledger report --format json --scan 63c0fe0d
+patchledger report --format sarif       # GitHub code scanning ingest
+```
+
+The HTML report is a single self-contained file: dark theme, no JavaScript,
+Content-Security-Policy included, all dynamic content escaped. The SARIF
+export carries normalized severity plus raw severity in properties,
+patchledger fingerprints as partialFingerprints, and coverage honesty as
+tool notifications.
+
+### `patchledger export-ai`
+
+Build a reviewer-ready prompt (Markdown by default, `--json` for structured
+output) from open, reintroduced, and inconclusive findings — with explicit
+constraints against inventing evidence. Works fully offline; bring your own
+reviewer (human or AI).
+
+```bash
+patchledger export-ai --output review-prompt.md --max-findings 25
+patchledger export-ai --min-severity high   # prioritize the review scope
+```
+
+### `patchledger doctor`
+
+Installation health: Python version, scanner availability with versions,
+config validity, database health. Missing scanners are informational, not
+errors.
+
+### `patchledger version`
+
+Show the version.
+
+## Exit codes
+
+| Code | Meaning                                                                 |
+|------|-------------------------------------------------------------------------|
+| 0    | Success — findings may exist but are below the threshold                |
+| 1    | Error — bad input, missing database, failed command                     |
+| 2    | Findings at or above the `--fail-on` severity threshold (CI gate)        |
+| 3    | Scan incomplete (missing/failed scanners) and `--strict` was passed      |
+
+## Configuration
+
+`.patchledger/config.json` (created by `init`, all keys optional):
+
+```json
+{
+  "scanning":   { "enabled": ["semgrep", "gitleaks", "bandit", "pip-audit"],
+                  "timeout_seconds": 600 },
+  "scoring":    { "severity_base": { "critical": 90, "high": 70 },
+                  "category_adjustment": { "secret": 10 } },
+  "verification": { "require_coverage_asserted": true },
+  "import_config": { "max_report_size_mb": 50, "disabled_rules": [] },
+  "redact_secrets": true,
+  "fail_on": "high"
+}
+```
+
+Rule suppression requires an explicit `disabled_rules` entry — PatchLedger
+never hides findings silently, and every suppression is counted and reported
+on import/scan.
+
+# docs/architecture.md
+
+# Architecture
+
+This document explains how PatchLedger is built, why the pieces are shaped
+the way they are, and where the documented limits live.
+
+## The pipeline
+
+```
+Repository (your code, local)
+      |
+      v
+Scanner runner  ─── semgrep / gitleaks / bandit / pip-audit / trivy
+      |               (as installed; missing tools recorded honestly)
+      v
+Parsers ─────── SARIF 2.1.0 · semgrep JSON · gitleaks JSON · bandit JSON
+      |         pip-audit JSON   (format auto-detected from content)
+      v
+Normalizer ──── severity maps · secret redaction · categories · remediation KB
+      |
+      v
+Fingerprints (fp2) ──► Deduplication ──► Risk scoring
+      |
+      v
+SQLite ledger ──── scans (immutable) · findings · occurrences · status_history
+      |
+      +──────────────┬───────────────────┐
+      v              v                   v
+Scan comparison  Patch verification  Reports (JSON / MD / HTML)
+      |              |                   |
+      └──────────────┴───────────────────┘
+                     v
+               CLI (Typer + Rich) · GitHub Actions integration
+```
+
+Source layout: `src/patchledger/` with one module per stage (mirrors the
+diagram); tests under `tests/` with real scanner reports recorded as fixtures.
+
+## Data model
+
+* **`Finding`** — the normalized unit: fingerprint, scanner, rule, severity,
+  confidence, category, title, description, location, evidence, remediation,
+  score + score factors, status, and occurrences.
+* **`Occurrence`** — one scanner's sighting. Deduplication merges findings
+  that share a fingerprint but never discards occurrences; each keeps its own
+  evidence and metadata (scanner metadata is preserved verbatim, never
+  interpreted).
+* **`Scan`** — one immutable observation point: target path, git commit/branch
+  when available, source (`scan` or `import`), and per-tool statuses
+  (`ran / failed / unavailable / skipped / imported`).
+* **`status_history`** — an explicit audit trail of ledger transitions
+  (resolved / inconclusive / reintroduced) with reasons and verification
+  evidence as JSON.
+
+## Storage
+
+SQLite (WAL mode, foreign keys ON) at `.patchledger/patchledger.db`.
+Schema versioning lives in `schema_meta.schema_version` with sequential
+migrations in `storage.py`. Multi-row inserts are transactional: a crash
+cannot leave a half-written scan. Scans carry a monotonic `seq` so
+"latest scan" is deterministic even when two scans land in the same
+clock second.
+
+## Fingerprints (`fp2`)
+
+```
+fingerprint = "fp2:" + sha256(fp_version, scanner, rule_id, path, message, evidence)[:32hex]
+```
+
+* **Message + evidence, not line numbers.** The message carries rule
+  semantics; the snippet distinguishes findings whose messages are generic
+  (bandit's `B101` on several assert lines). Line numbers are excluded so
+  edits above the finding don't change identity, while edits *to* the flagged
+  line legitimately produce a new identity.
+* **Scanner identity, not file format.** Importing semgrep output twice in
+  different formats is stable *within* a format. Documented limit: formats
+  that differ in whether they carry snippets produce different fingerprints
+  (`tests/test_normalizer.py` demonstrates this). The primary pipeline always
+  uses one consistent format per tool, so cross-scan fingerprints are stable.
+* **Versioned.** The `fp2:` prefix lets future identity changes coexist with
+  history.
+
+## Verification semantics
+
+The differentiator. A finding absent from the newer scan is a *resolution
+candidate*. It becomes `resolved` only when **all** of:
+
+1. Every scanner that ever reported the fingerprint appears in the current
+   scan with status `ran` (a real local run).
+2. The current scan targeted the same path as the last observation.
+3. The current scan is not an imported report (imports cannot assert
+   coverage).
+
+Otherwise the state is `inconclusive` — explicitly *not* fixed — with the
+reasons recorded. Scanner version changes between baseline and current are
+recorded as caveats (rule sets may differ) without blocking verification.
+All of these behaviors are pinned by `tests/test_verification.py`.
+
+## Risk scoring
+
+Deterministic and fully explained: a base score per normalized severity plus
+documented adjustments for scanner confidence, evidence presence, and
+category (secrets and injections weigh more). Every adjustment is listed on
+the finding. PatchLedger never invents CVSS scores or escalates severity on
+its own. Rules are configurable in `.patchledger/config.json`.
+
+## Security posture of PatchLedger itself
+
+See `docs/security-model.md` for the threat model. Headlines: argv-list
+subprocess execution only (never a shell, never auto-downloaded tools),
+parameterized SQL everywhere, strict size-capped JSON parsing, HTML reports
+with zero JavaScript and a restrictive CSP, secret redaction on ingest, and
+no network access after installation (except pip-audit's advisory DB).
+
+# docs/security-model.md
+
+# Security model
+
+PatchLedger is a security tool, so it is held to the standard it enforces.
+This document states the threat model, the guarantees, and the honest limits.
+
+## What PatchLedger is for
+
+Scanning and verifying **repositories you are authorized to assess**. It is
+a local CLI: source code, findings, and reports stay on your machine unless
+you choose to publish them (e.g. upload a CI artifact).
+
+## Guarantees
+
+### Process execution
+* Scanners run through `subprocess.run` with **argv lists** — never
+  `shell=True`, never string interpolation into a command line.
+* The executable is the one `shutil.which`/config resolved; argv[0] is pinned
+  to the discovered path (no PATH re-resolution at exec time).
+* Hard timeouts kill runaway scanners; stdout/stderr are captured, bounded,
+  and only excerpted into notes on failure.
+* PatchLedger **never downloads or executes** tools on its own. `doctor`
+  reports availability; you install scanners yourself.
+
+### Input handling
+* Report files are size-capped (default 50 MB, hard absolute cap 512 MB),
+  parsed strictly (`NaN`/`Infinity` rejected), with actionable errors for
+  malformed input and clear behavior for adversarial nesting.
+* Parser code treats report content as data only — no `eval`, no dynamic
+  imports, no templated execution. SARIF URIs are URL-decoded and
+  path-normalized, never executed or resolved into command lines.
+
+### Storage
+* Every SQL statement is parameterized; there is no string-built SQL.
+* WAL mode + foreign keys ON; transactions wrap scan inserts so crashes
+  cannot corrupt state.
+
+### Secrets
+* gitleaks material is redacted on ingest: raw `Secret`/`Match` values never
+  reach storage; evidence carries prefix/suffix/length only.
+* Secret-category evidence from any scanner has quoted literals, PEM blocks,
+  and common token formats (AWS/GitHub/Slack/Stripe/GitLab) redacted.
+* Redaction is best-effort and documented as such — **rotation is the real
+  fix**; removing a value from reports does not un-leak anything.
+* PatchLedger has no telemetry, no network calls at runtime (except
+  pip-audit's advisory DB queries), and never transmits your code anywhere.
+
+### Reports
+* The HTML report contains **zero JavaScript** and ships a
+  `Content-Security-Policy` of `default-src 'none'; style-src 'unsafe-inline'`
+  — the script-injection sink does not exist. Every dynamic value passes
+  through `html.escape`; hostile-payload tests pin this.
+* Markdown reports escape table pipes so findings cannot break out of their
+  structure.
+* Example reports are clearly labelled **SYNTHETIC EXAMPLE DATA** and are
+  generated from fabricated findings — never presented as real scans.
+
+### Verification honesty
+* A finding is `resolved` only with full scanner coverage (see
+  `docs/architecture.md`). Missing tools, failed runs, different targets, and
+  imported reports all yield **inconclusive** — never a silent "fixed".
+* Incomplete scans are labelled as such in every report and in the CLI.
+
+## Honest limits
+
+* **Coverage is approximated per tool run**, not per file: if semgrep ran
+  successfully on the target, its rules are considered to have covered the
+  tree. Tools' internal ignore files (`.semgrepignore`, `.gitignore` for
+  gitleaks) are not currently parsed; a rule that never sees a file can still
+  allow a false-verified resolution in that corner.
+* **Fingerprints are content-based.** Two byte-identical flagged snippets for
+  the same rule at the same path merge (identical issues are the same issue).
+* **Cross-format imports** of the same tool can produce different
+  fingerprints when one format carries snippets the other doesn't.
+* **Redaction is heuristic.** Novel secret formats may pass through in
+  evidence; treat all PatchLedger output as containing the secrets your code
+  contains until proven otherwise.
+* **Risk scores are prioritization aids**, not measurements; they are
+  deterministic and explainable but not a substitute for human triage.
+* **Severity ceiling for coarse sources.** SARIF and semgrep only expose
+  error/warning/note levels, which normalize to at most `high`. Sources that
+  report `critical` explicitly can trigger a critical; `--fail-on critical`
+  therefore prints an explanatory notice and cannot rely on coarse sources
+  to ever produce critical findings.
+* **Scanning untrusted repositories.** PatchLedger never executes repo
+  scripts itself, but some *scanners* do inherently: `pip-audit -r
+  requirements.txt` performs dependency resolution that can build sdists
+  (executing `setup.py`), and tools may auto-load repo-level configs
+  (e.g. `gitleaks.toml`) that change their behavior. When scanning code you
+  do not trust, run PatchLedger inside a sandbox (container, throwaway VM)
+  — that is the standard practice for running arbitrary scanners against
+  untrusted trees, and it applies here too. Configuration under
+  `.patchledger/` controls thresholds and rule suppression, **never tool
+  execution**: there is deliberately no config-driven tool search path.
+* **Markdown reports** escape structure-forging metacharacters and size
+  evidence fences dynamically, but Markdown is a simpler format than the
+  zero-JavaScript HTML report; prefer HTML when sharing reports.
+
+## Dependencies
+
+Runtime dependencies are deliberately minimal (`typer`, `pydantic`, `rich`)
+and CI runs `pip-audit` on the project itself. Dependency advisories that
+affect PatchLedger are treated as security bugs — see `SECURITY.md`.
+
+# docs/faq.md
+
+# FAQ
+
+## Does PatchLedger need an AI API?
+
+No. The core engine — scanning, normalization, deduplication, scoring,
+comparison, verification, reporting — is fully deterministic and works
+offline. `patchledger export-ai` generates a structured review prompt you can
+paste into *any* external assistant or hand to a human reviewer; the prompt
+carries the evidence and forbids inventing more. A bring-your-own-key AI
+integration may arrive later as an optional extension — it will never be
+required.
+
+## Where does my code go?
+
+Nowhere. Scanning runs locally against your working tree. The only outbound
+network use is pip-audit querying the PyPI advisory database. Reports are
+written where you point them (and uploaded as CI artifacts only if you
+configure that).
+
+## A scanner disappeared between scans — is that finding "fixed"?
+
+No — it is *inconclusive*. PatchLedger only marks a finding resolved when
+every scanner that ever reported it ran successfully in the newer scan on the
+same target. Missing tools, failed scans, and imported reports all produce
+inconclusive verdicts with recorded reasons. Run the missing scanner and
+rescan to turn inconclusive into verified.
+
+## Why did my finding's fingerprint change after I edited the flagged line?
+
+By design: the fingerprint includes the code snippet, and the snippet changed.
+The old finding becomes a resolution candidate (verified fixed if coverage
+was sufficient) and the edited line appears as a new finding. Edits elsewhere
+in the file do *not* change the fingerprint.
+
+## Can two different scanners' findings be merged?
+
+No. Fingerprints include the scanner identity, so semgrep and bandit sightings
+of the same problem stay separate findings — merging them would lose the
+per-tool evidence that patch verification depends on.
+
+## How do I silence a rule?
+
+Only via explicit configuration: put the rule id in
+`.patchledger/config.json` under `import_config.disabled_rules`. Suppression
+is never silent — the scan/import output reports exactly what was suppressed
+and how often.
+
+## Are example reports real scan data?
+
+No. Everything under `examples/` and the website's report preview is
+synthetic, clearly labelled, and generated by `scripts/generate_examples.py`
+from fabricated findings.
+
+## Is the HTML report safe to share?
+
+It is a single self-contained file with no JavaScript and a restrictive CSP;
+all dynamic content is escaped. It does contain your findings — including
+redacted evidence — so treat it as sensitive and share it deliberately.
+
+## Does it run on Windows/macOS?
+
+The package targets any OS with Python 3.10+ (console scripts, no compiled
+deps). Most testing happens on Linux; scanner availability varies per OS the
+same way it would for the scanners themselves. Windows-specific issues are
+welcome bug reports.
+
+## How is this different from just running the scanners?
+
+Running the scanners gives you five report formats, five severity scales, no
+history, and no proof. PatchLedger gives you one ledger with stable identity
+across time, explainable scores, and — the point — verification that a fix
+actually happened before anyone marks it done.
+
+# docs/example-workflow.md
+
+# Example: run PatchLedger in your repository's CI
+
+Copy this file into your repository as
+`.github/workflows/patchledger-scan.yml`. It installs PatchLedger, scans the
+repository on every push and pull request, uploads the HTML report as a
+workflow artifact, and fails the job when findings meet or exceed the
+severity threshold.
+
+Notes:
+
+* `--fail-on high` means: exit code 2 when any open/reintroduced finding is
+  high or critical. Adjust to `medium`, `critical`, or `low`.
+* Scanner availability is honest: if a scanner is not installed, PatchLedger
+  reports it as unavailable instead of claiming a complete scan. Install the
+  tools you want (see docs/installation.md) to widen coverage.
+* The PatchLedger database lives in `.patchledger/` inside the runner
+  workspace — it is ephemeral per CI run, which is fine for threshold gates.
+  Durable scan history and patch verification work best from local runs.
+* Once PatchLedger is published to PyPI you can replace the pip install line
+  with `pip install patchledger`.
+
+```yaml
+name: PatchLedger security scan
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0  # full history helps gitleaks if it is installed
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PatchLedger (pinned)
+        run: pip install "patchledger @ git+https://github.com/navairgap/patchledger@v0.1.0"
+
+      - name: Run security scan
+        run: |
+          patchledger init
+          patchledger scan . --fail-on high
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: patchledger-report
+          path: |
+            patchledger-report-*.html
+            patchledger-report-*.json
+          if-no-files-found: ignore
+```
+
+## Customizing
+
+* **Different threshold:** change `--fail-on` (severity: `critical`, `high`,
+  `medium`, `low`). Exit code 2 fails the job; a clean scan exits 0.
+* **Fail on incomplete scans:** add `--strict` to the scan step — the job
+  then also fails (exit 3) when scanners were unavailable or failed.
+* **Specific scanners only:** pass `--scanner bandit --scanner pip-audit`
+  (repeatable flag) to override the configured scanner list.
+* **Configuration file:** commit a `.patchledger/config.json` to your
+  repository (created by `patchledger init`) to control scoring rules,
+  disabled rules, and the default threshold. Rule suppression always
+  requires this explicit file — PatchLedger never hides findings silently.
+
+# docs/releasing.md
+
+# Releasing PatchLedger (maintainer guide)
+
+## Checklist before tagging
+
+1. `pytest`, `ruff check src tests scripts`, `mypy` — all green.
+2. Update `CHANGELOG.md`: move the unreleased section to the new version and
+   date; add any last entries.
+3. Bump `version` in `pyproject.toml` (and `src/patchledger/__init__.py`),
+   commit.
+4. `uv build` and smoke-test in a fresh venv:
+
+   ```bash
+   uv venv /tmp/pl-check
+   uv pip install --python /tmp/pl-check/bin/python dist/*.whl
+   /tmp/pl-check/bin/patchledger version
+   /tmp/pl-check/bin/patchledger doctor
+   ```
+
+## Tag and publish
+
+```bash
+git tag -a vX.Y.Z -m "PatchLedger vX.Y.Z"
+git push origin vX.Y.Z
+```
+
+The `Release` workflow builds the distribution, smoke-tests the wheel, and
+publishes a GitHub Release with generated notes plus both artifacts.
+
+## PyPI (when enabled)
+
+Publishing to PyPI is intentionally not automated until the project is
+officially on PyPI. When it is: add an `pypi publish` job using trusted
+publishing (PyPI OIDC, no API tokens) that uploads `dist/*` after the smoke
+test, and switch the user-facing example workflow from the pinned git
+install to `pip install patchledger`.
+
+## After release
+
+- Verify the GitHub Release page renders notes and assets.
+- Update the website roadmap section if the release changed status claims.
+- Announce with a link to the changelog, not to a marketing claim.
