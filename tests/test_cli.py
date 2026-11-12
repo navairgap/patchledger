@@ -271,7 +271,7 @@ def test_doctor_runs(tmp_path):
 
 
 def test_scan_label_and_findings_rule_filter(tmp_path, monkeypatch):
-    args, db_path = _db_args(tmp_path)
+    args, _db_path = _db_args(tmp_path)
     repo = tmp_path / "repo"
     repo.mkdir()
     runner.invoke(app, [*args, "init", str(repo)])
@@ -295,7 +295,7 @@ def test_scan_label_and_findings_rule_filter(tmp_path, monkeypatch):
 
 
 def test_export_ai_min_severity(tmp_path, monkeypatch):
-    args, db_path = _db_args(tmp_path)
+    args, _db_path = _db_args(tmp_path)
     repo = tmp_path / "repo"
     repo.mkdir()
     runner.invoke(app, [*args, "init", str(repo)])

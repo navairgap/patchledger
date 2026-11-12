@@ -38,11 +38,21 @@ def render_sarif(data: ReportData) -> str:
                 "shortDescription": {"text": finding.title[:1000]},
                 "helpUri": _first_uri(finding.remediation) or "",
             }
+        locations: list[dict] = []
+        if finding.file_path:
+            locations.append(
+                {
+                    "physicalLocation": {
+                        "artifactLocation": {"uri": finding.file_path},
+                        "region": {"startLine": max(finding.start_line or 1, 1)},
+                    }
+                }
+            )
         result = {
             "ruleId": finding.rule_id,
             "level": _LEVEL[finding.severity],
             "message": {"text": finding.description or finding.title},
-            "locations": [],
+            "locations": locations,
             "partialFingerprints": {"patchledgerFingerprint/v1": finding.fingerprint},
             "properties": {
                 "patchledgerSeverity": finding.severity.value,
@@ -53,14 +63,6 @@ def render_sarif(data: ReportData) -> str:
                 "status": finding.status.value,
             },
         }
-        if finding.file_path:
-            location: dict = {
-                "physicalLocation": {
-                    "artifactLocation": {"uri": finding.file_path},
-                    "region": {"startLine": max(finding.start_line or 1, 1)},
-                }
-            }
-            result["locations"].append(location)
         results.append(result)
 
     tool_notifications = [
