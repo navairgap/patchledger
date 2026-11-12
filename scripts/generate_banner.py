@@ -52,26 +52,31 @@ def rects(fill: str, dx: int = 0, dy: int = 0) -> str:
 def svg(theme: str) -> str:
     if theme == "dark":
         bg, grad_top = "#0d1117", "#fde047"   # matches GitHub dark exactly
-        echo, stroke = "#7c2d12", "#0d1117"
+        echo = "#7c2d12"
     else:
         bg, grad_top = "#ffffff", "#f59e0b"
-        echo, stroke = "#fdba74", "#ffffff"
+        echo = "#fdba74"
     grad = (
-        f'<linearGradient id="amber" x1="0" y1="0" x2="0" y2="1">'
+        '<linearGradient id="amber" x1="0" y1="0" x2="0" y2="1">'
         f'<stop offset="0" stop-color="{grad_top}"/>'
-        f'<stop offset="0.55" stop-color="#f59e0b"/>'
-        f'<stop offset="1" stop-color="#ea580c"/>'
-        f"</linearGradient>"
+        '<stop offset="0.55" stop-color="#f59e0b"/>'
+        '<stop offset="1" stop-color="#ea580c"/>'
+        "</linearGradient>"
     )
-    return f'''<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="{HEIGHT}" viewBox="0 0 1200 {HEIGHT}" role="img" aria-label="PatchLedger">
+    root = (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1200" '
+        f'height="{HEIGHT}" viewBox="0 0 1200 {HEIGHT}" '
+        'role="img" aria-label="PatchLedger">'
+    )
+    return f"""{root}
   <defs>{grad}</defs>
   <rect width="1200" height="{HEIGHT}" fill="{bg}"/>
   <!-- solid drop layer behind the word -->
   {rects(echo, dx=6, dy=6)}
   <!-- pixel word -->
-  {rects(f"url(#amber)")}
+  {rects("url(#amber)")}
 </svg>
-'''
+"""
 
 
 out = Path(__file__).resolve().parent.parent / "website" / "assets"
