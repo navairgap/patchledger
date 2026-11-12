@@ -13,6 +13,8 @@
 
 ### PatchLedger is an evidence-first security finding and remediation verification platform.
 
+-Run PatchLedger only against repositories you are authorized to assess-
+
 It runs the scanners you already trust, unifies their findings into one
 persistent, deduplicated ledger — and verifies that a vulnerability was
 actually fixed, with scanner-coverage evidence, before calling it resolved.

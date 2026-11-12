@@ -1,8 +1,12 @@
-"""Generate the PatchLedger pixel-wordmark banner SVGs (Shannon-style)."""
+"""Generate the PatchLedger pixel-wordmark banner SVGs (Shannon-style).
+
+Clean chunky version: solid pixel blocks on a seamless background (no
+border, no baked-in text — subtitles are README text), with a solid
+dark-amber drop layer offset behind the letters for the 3D pixel effect.
+"""
 
 from pathlib import Path
 
-# 5x7 pixel glyphs for the letters in PATCHLEDGER
 GLYPHS = {
     "P": ["11110", "10001", "10001", "11110", "10000", "10000", "10000"],
     "A": ["01110", "10001", "10001", "11111", "10001", "10001", "10001"],
@@ -17,19 +21,19 @@ GLYPHS = {
 }
 
 WORD = "PATCHLEDGER"
-BLOCK = 15      # px per pixel
-GAP = 2         # dark gap between blocks
+BLOCK = 16
+GAP = 1
 PITCH = BLOCK + GAP
-COLS = sum(len(GLYPHS[ch][0]) for ch in WORD) + (len(WORD) - 1)  # + letter gaps
+COLS = sum(len(GLYPHS[ch][0]) for ch in WORD) + (len(WORD) - 1)
 ROWS = 7
 ART_W = COLS * PITCH - GAP
 ART_H = ROWS * PITCH - GAP
-
 MARGIN_X = (1200 - ART_W) // 2
-ART_TOP = 64
+HEIGHT = 240
+ART_TOP = (HEIGHT - ART_H) // 2
 
 
-def rects(fill: str, stroke: str, dx: int = 0, dy: int = 0, stroke_w: int = 0) -> str:
+def rects(fill: str, dx: int = 0, dy: int = 0) -> str:
     out = []
     x = MARGIN_X + dx
     for ch in WORD:
@@ -39,9 +43,7 @@ def rects(fill: str, stroke: str, dx: int = 0, dy: int = 0, stroke_w: int = 0) -
                 if bit == "1":
                     out.append(
                         f'<rect x="{x + c * PITCH}" y="{ART_TOP + dy + r * PITCH}" '
-                        f'width="{BLOCK}" height="{BLOCK}" rx="2" fill="{fill}"'
-                        + (f' stroke="{stroke}" stroke-width="{stroke_w}"' if stroke else "")
-                        + "/>"
+                        f'width="{BLOCK}" height="{BLOCK}" rx="1.5" fill="{fill}"/>'
                     )
         x += (len(glyph[0]) + 1) * PITCH
     return "\n  ".join(out)
@@ -49,37 +51,25 @@ def rects(fill: str, stroke: str, dx: int = 0, dy: int = 0, stroke_w: int = 0) -
 
 def svg(theme: str) -> str:
     if theme == "dark":
-        bg, border, dot = "#0b0e14", "#232c3e", "#8a94a6"
-        sub, muted = "#eef1f6", "#8a94a6"
+        bg, grad_top = "#0d1117", "#fde047"   # matches GitHub dark exactly
+        echo, stroke = "#7c2d12", "#0d1117"
     else:
-        bg, border, dot = "#f6f8fa", "#d0d7de", "#57606a"
-        sub, muted = "#0d1117", "#57606a"
+        bg, grad_top = "#ffffff", "#f59e0b"
+        echo, stroke = "#fdba74", "#ffffff"
     grad = (
         f'<linearGradient id="amber" x1="0" y1="0" x2="0" y2="1">'
-        f'<stop offset="0" stop-color="{"#fde047" if theme == "dark" else "#f59e0b"}"/>'
-        f'<stop offset="0.5" stop-color="#f59e0b"/>'
+        f'<stop offset="0" stop-color="{grad_top}"/>'
+        f'<stop offset="0.55" stop-color="#f59e0b"/>'
         f'<stop offset="1" stop-color="#ea580c"/>'
         f"</linearGradient>"
     )
-    return f'''<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" role="img" aria-label="PatchLedger">
-  <defs>
-    {grad}
-    <pattern id="dots" width="26" height="26" patternUnits="userSpaceOnUse">
-      <circle cx="1.2" cy="1.2" r="1.2" fill="{dot}" opacity="0.12"/>
-    </pattern>
-  </defs>
-  <rect width="1200" height="300" fill="{bg}"/>
-  <rect width="1200" height="300" fill="url(#dots)"/>
-  <rect x="0.5" y="0.5" width="1199" height="299" fill="none" stroke="{border}"/>
-  <!-- echo outlines behind the word -->
-  <g opacity="0.55">
-  {rects("none", "#b45309", dx=7, dy=7, stroke_w=2)}
-  </g>
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="{HEIGHT}" viewBox="0 0 1200 {HEIGHT}" role="img" aria-label="PatchLedger">
+  <defs>{grad}</defs>
+  <rect width="1200" height="{HEIGHT}" fill="{bg}"/>
+  <!-- solid drop layer behind the word -->
+  {rects(echo, dx=6, dy=6)}
   <!-- pixel word -->
-  {rects("url(#amber)", bg, stroke_w=2)}
-  <text x="600" y="{ART_TOP + ART_H + 46}" text-anchor="middle" font-family="ui-sans-serif,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="26" font-weight="700" fill="{sub}">Security findings, verified fixed.</text>
-  <text x="600" y="{ART_TOP + ART_H + 78}" text-anchor="middle" font-family="ui-sans-serif,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="18" fill="{muted}">-Run only against repositories you are authorized to assess-</text>
-  <text x="600" y="286" text-anchor="middle" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="13" fill="{muted}" opacity="0.75" letter-spacing="0.8">SCAN → NORMALIZE → FINGERPRINT → VERIFY · NO AI API · LOCAL-FIRST · MIT</text>
+  {rects(f"url(#amber)")}
 </svg>
 '''
 
@@ -87,5 +77,4 @@ def svg(theme: str) -> str:
 out = Path(__file__).resolve().parent.parent / "website" / "assets"
 (out / "banner-pixel-dark.svg").write_text(svg("dark"), encoding="utf-8")
 (out / "banner-pixel-light.svg").write_text(svg("light"), encoding="utf-8")
-print(f"art {ART_W}x{ART_H}px, margin_x={MARGIN_X}")
-print("wrote banner-pixel-dark.svg and banner-pixel-light.svg")
+print(f"art {ART_W}x{ART_H}, banner 1200x{HEIGHT}, seamless bg")
