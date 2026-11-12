@@ -1,0 +1,38 @@
+name: Release
+
+# Publishes a GitHub Release with the built distribution when a v* tag is
+# pushed. Uses only first-party actions (pinned to verified commit SHAs) and
+# the preinstalled gh CLI — no third-party release actions.
+
+"on":
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
+      - name: Build sdist and wheel
+        run: uv build
+      - name: Smoke-test the wheel
+        run: |
+          uv venv /tmp/pl-smoke
+          uv pip install --python /tmp/pl-smoke/bin/python dist/*.whl
+          /tmp/pl-smoke/bin/patchledger version
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "PatchLedger ${GITHUB_REF_NAME}" \
+            --generate-notes \
+            dist/*.whl dist/*.tar.gz
