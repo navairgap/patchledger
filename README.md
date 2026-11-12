@@ -34,7 +34,7 @@ patchledger init && patchledger scan .
 
 ---
 
-<a href="https://navairgap.github.io/patchledger/"><img src="./assets/github-button-site.png" height="46" alt="Live website"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://navairgap.github.io/patchledger/#report"><img src="./assets/button-docs.png" height="46" alt="See an example report"></a>
+<a href="https://navairgap.github.io/patchledger/"><img src="./assets/button-site.png" height="46" alt="Live website"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://navairgap.github.io/patchledger/#report"><img src="./assets/button-docs.png" height="46" alt="See an example report"></a>
 
 </div>
 
