@@ -3,26 +3,31 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="PatchLedger — an evidence-first, open-source security finding and remediation verification platform for developers. Find it. Understand it. Fix it. Prove it.">
+  <meta name="description" content="PatchLedger — an evidence-first, open-source security finding and remediation verification platform. Run real scanners, keep one ledger, and verify fixes with scanner-coverage evidence. No AI API, no cloud.">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; script-src 'self'; img-src 'self' data:;">
   <title>PatchLedger — Find it. Understand it. Fix it. Prove it.</title>
   <link rel="stylesheet" href="styles.css">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%230d1117'/%3E%3Crect x='3' y='3' width='4' height='10' rx='1' fill='%233fb968'/%3E%3Crect x='9' y='3' width='4' height='10' rx='1' fill='%23232b3b'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3.5' fill='%230b0e14'/%3E%3Crect x='3' y='3' width='4.2' height='10' rx='1' fill='%2346c26e'/%3E%3Crect x='8.8' y='3' width='4.2' height='10' rx='1' fill='%232a3346'/%3E%3C/svg%3E">
 </head>
 <body>
   <header class="site-header">
     <div class="container">
-      <a class="brand" href="#top"><span class="logo-dot" aria-hidden="true"></span>PatchLedger</a>
+      <a class="brand" href="#top">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i></span>
+        PatchLedger <small>evidence-first</small>
+      </a>
       <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
       <nav class="site-nav" aria-label="Main navigation">
         <a href="#overview">Overview</a>
         <a href="#features">Features</a>
         <a href="#verification">Verification</a>
         <a href="#cli">CLI</a>
-        <a href="#report">Report</a>
         <a href="#installation">Install</a>
         <a href="#docs">Docs</a>
-        <a class="nav-cta" href="https://github.com/navairgap/patchledger" rel="noopener">GitHub ↗</a>
+        <a class="nav-gh" href="https://github.com/navairgap/patchledger" rel="noopener">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+          GitHub
+        </a>
       </nav>
     </div>
   </header>
@@ -30,46 +35,83 @@
   <main id="top">
     <!-- ============================================================ HERO -->
     <section class="hero">
-      <div class="container">
-        <span class="hero-badge">Open source · MIT · No AI API required</span>
-        <h1>Security findings with <span class="accent">proof of the fix</span></h1>
-        <p class="sub">
-          PatchLedger scans your repositories with established tools, normalizes every
-          finding into one ledger, and — the part most tools skip — verifies whether a
-          vulnerability was <em>actually fixed</em> before calling it resolved.
-        </p>
-        <div class="hero-ctas">
-          <a class="btn btn-primary" href="#installation">Get started</a>
-          <a class="btn btn-ghost" href="https://github.com/navairgap/patchledger" rel="noopener">View on GitHub</a>
-          <a class="btn btn-ghost" href="#report">See an example report</a>
+      <div class="container hero-grid">
+        <div>
+          <span class="kicker">Open source · MIT · Local-first</span>
+          <h1>Every security finding.<br><em>Verified fixed.</em></h1>
+          <p class="sub">
+            PatchLedger runs the scanners you already trust, merges their findings into
+            one persistent ledger — and refuses to call anything <strong>fixed</strong>
+            without scanner-coverage evidence. No AI API. No cloud. Your code never
+            leaves your machine.
+          </p>
+          <div class="hero-ctas">
+            <a class="btn btn-primary" href="#installation">Get started</a>
+            <a class="btn btn-ghost" href="#verification">How verification works</a>
+            <a class="btn btn-ghost" href="#report">See a report</a>
+          </div>
+          <div class="hero-facts">
+            <div><div class="v">6 formats</div><div class="k">import + SARIF out</div></div>
+            <div><div class="v">0 APIs</div><div class="k">no AI, no cloud</div></div>
+            <div><div class="v">fp2</div><div class="k">stable fingerprints</div></div>
+          </div>
         </div>
-        <p class="hero-motto">Find it · Understand it · Fix it · <strong>Prove it</strong></p>
+        <div class="terminal" role="img" aria-label="Terminal showing a PatchLedger verify session">
+          <div class="terminal-bar" aria-hidden="true">
+            <i></i><i></i><i></i><span>patchledger — zsh</span>
+          </div>
+          <pre><span class="c-prompt">$</span> <span class="c-cmd">patchledger scan .</span>
+<span class="c-dim">┌ Scanner coverage ────────────────────────────┐</span>
+<span class="c-dim">│</span> semgrep   ran          1.185.0
+<span class="c-dim">│</span> bandit     ran          1.9.4
+<span class="c-dim">│</span> gitleaks   <span class="c-warn">unavailable</span>  not installed
+<span class="c-dim">└──────────────────────────────────────────────┘</span>
+<span class="c-out">Scan 86d9e807 stored: 9 findings, 2 merged</span>
+
+<span class="c-prompt">$</span> <span class="c-cmd">patchledger verify</span>
+<span class="c-ok">  FIXED VERIFIED</span> <span class="c-out">fp2:56e15c… all reporting scanners ran</span>
+<span class="c-warn">  INCONCLUSIVE</span>  <span class="c-out">fp2:91ac… gitleaks did not run</span>
+
+<span class="c-prompt">$</span> <span class="c-cmd">patchledger report --format sarif</span>
+<span class="c-out">Report written: patchledger-report-86d9e807.sarif</span></pre>
+        </div>
       </div>
     </section>
 
     <!-- ======================================================== OVERVIEW -->
     <section id="overview" class="section">
       <div class="container">
-        <h2><span class="section-kicker">Overview</span>One ledger for every scanner</h2>
-        <p class="lead">
-          Developers run one tool for secrets, another for vulnerable dependencies, a third
-          for insecure code. PatchLedger imports their results — or runs them for you — and
-          merges everything into a single, deduplicated, scored, and explainable ledger that
-          persists across scans.
-        </p>
-        <div class="cards">
-          <div class="card"><span class="icon" aria-hidden="true">⇉</span>
+        <div class="sec-head">
+          <span class="sec-num">01 — Overview</span>
+          <h2>One ledger for every scanner</h2>
+          <p class="lede">
+            One tool finds secrets, another flags vulnerable dependencies, a third
+            catches insecure code. PatchLedger imports all of their reports — or runs
+            them for you — and merges everything into a single, deduplicated, scored
+            ledger that <strong>persists across scans</strong>.
+          </p>
+        </div>
+        <div class="ledger-list">
+          <div class="ledger-row">
+            <span class="no">in</span>
             <h3>Import or scan</h3>
-            <p>Bring SARIF, semgrep, gitleaks, bandit, and pip-audit reports — or let PatchLedger run the tools it finds on your machine.</p></div>
-          <div class="card"><span class="icon" aria-hidden="true">≡</span>
-            <h3>Normalize & dedup</h3>
-            <p>Every finding gets a stable fingerprint and one consistent severity scale. Duplicate sightings merge; evidence is preserved.</p></div>
-          <div class="card"><span class="icon" aria-hidden="true">✓</span>
+            <p>SARIF 2.1.0, semgrep, gitleaks, bandit, and pip-audit reports — or live execution of the tools already on your machine. Missing tools are recorded, never hidden.</p>
+          </div>
+          <div class="ledger-row">
+            <span class="no">≡</span>
+            <h3>Normalize &amp; deduplicate</h3>
+            <p>Every finding gets a stable <code>fp2</code> fingerprint and one severity scale. Duplicate sightings merge; every occurrence keeps its own evidence.</p>
+          </div>
+          <div class="ledger-row">
+            <span class="no">✓</span>
             <h3>Verify the fix</h3>
-            <p>A finding disappears from a scan? PatchLedger checks scanner coverage before it says "fixed" — otherwise it stays honestly inconclusive.</p></div>
-          <div class="card"><span class="icon" aria-hidden="true">▤</span>
-            <h3>Report & share</h3>
-            <p>Professional JSON, Markdown, and self-contained HTML reports with evidence, remediation guidance, and full scanner-coverage honesty.</p></div>
+            <p>A finding disappears from the new scan? Verification checks scanner coverage before saying "fixed" — otherwise it stays honestly <code>inconclusive</code>.</p>
+          </div>
+          <div class="ledger-row">
+            <span class="no">out</span>
+            <h3>Report anywhere</h3>
+            <p>JSON, Markdown, self-contained dark HTML, and SARIF for GitHub code scanning — with coverage honesty baked into every format.</p>
+          </div>
         </div>
       </div>
     </section>
@@ -77,22 +119,38 @@
     <!-- ========================================================= PROBLEM -->
     <section id="problem" class="section section-alt">
       <div class="container">
-        <h2><span class="section-kicker">The problem</span>Tool sprawl, manual triage, unverifiable fixes</h2>
-        <div class="cards">
-          <div class="card"><span class="icon" aria-hidden="true">⌗</span>
-            <h3>Five tools, five formats</h3>
-            <p>Severity scales differ, paths differ, duplicates multiply. Triaging means juggling five dashboards and a spreadsheet.</p></div>
-          <div class="card"><span class="icon" aria-hidden="true">?</span>
-            <h3>"Is it fixed?" is a guess</h3>
-            <p>Most pipelines call a finding resolved when it stops appearing — even if the scanner never ran, crashed, or didn't cover that code.</p></div>
-          <div class="card"><span class="icon" aria-hidden="true">⏳</span>
-            <h3>No memory between scans</h3>
-            <p>Without scan history you can't tell "persistent since March" from "new this week" — or catch a fix silently regressing.</p></div>
+        <div class="sec-head">
+          <span class="sec-num">02 — The problem</span>
+          <h2>Tool sprawl, manual triage, unverifiable fixes</h2>
+          <p class="lede">The scanners are fine. The workflow around them is broken.</p>
+        </div>
+        <div class="problem-stack">
+          <div class="problem-item">
+            <span class="mark">✕</span>
+            <div>
+              <h3>Five tools, five formats, one spreadsheet</h3>
+              <p>Severity scales disagree, paths disagree, duplicates multiply. Triage means reconciling five dashboards by hand — and important findings drown.</p>
+            </div>
+          </div>
+          <div class="problem-item">
+            <span class="mark">?</span>
+            <div>
+              <h3>"Is it fixed?" is a guess</h3>
+              <p>Most pipelines declare a finding resolved the moment it stops appearing — even if the scanner never ran, crashed, or never covered that file. False "resolved" states are how regressions reach production.</p>
+            </div>
+          </div>
+          <div class="problem-item">
+            <span class="mark">⏳</span>
+            <div>
+              <h3>No memory between scans</h3>
+              <p>Without history you cannot tell "persistent since March" from "new this week" — and a silently regressing fix looks exactly like a fresh finding.</p>
+            </div>
+          </div>
         </div>
         <div class="callout">
           <strong>PatchLedger's answer:</strong> a local-first ledger with deterministic
-          fingerprints, explainable risk scores, and patch verification that refuses to claim
-          a fix without evidence. No cloud account, no AI subscription, no data leaving your machine.
+          fingerprints, explainable risk scores, and patch verification that demands
+          evidence. Nothing is marked fixed on a guess.
         </div>
       </div>
     </section>
@@ -100,16 +158,52 @@
     <!-- ======================================================== FEATURES -->
     <section id="features" class="section">
       <div class="container">
-        <h2><span class="section-kicker">Features</span>Built for real remediation work</h2>
-        <div class="cards">
-          <div class="card"><h3>Honest scan coverage</h3><p>Every scan records which tools ran, failed, or were missing. Reports are labelled incomplete when coverage isn't full — never silently optimistic.</p></div>
-          <div class="card"><h3>Stable fingerprints</h3><p>Findings survive line shifts and formatter runs; genuinely changed code gets a new identity. Fingerprints are versioned and documented.</p></div>
-          <div class="card"><h3>Explainable risk scores</h3><p>Deterministic 0–100 scores where every adjustment is listed: severity base, confidence, evidence quality, category.</p></div>
-          <div class="card"><h3>Scan history & diffs</h3><p>Compare any two scans: new, persistent, reintroduced, changed severity, changed location — with an audit trail of status transitions.</p></div>
-          <div class="card"><h3>Local remediation knowledge</h3><p>Offline guidance per rule category: why it matters, consequences, concrete fix, secure pattern, references. Advice stays separate from evidence.</p></div>
-          <div class="card"><h3>Offline AI review prompts</h3><p>Generate a reviewer-ready Markdown prompt from selected findings — with explicit rules against inventing evidence. Bring your own reviewer, human or AI.</p></div>
-          <div class="card"><h3>Secret redaction</h3><p>Leaked credentials are redacted on ingest (gitleaks matches, PEM blocks, common token formats) before anything is stored or rendered.</p></div>
-          <div class="card"><h3>CI-ready exit codes</h3><p><code>--fail-on high</code> exits 2 on threshold hits; <code>--strict</code> exits 3 on incomplete scans. Documented and GitHub-Actions ready.</p></div>
+        <div class="sec-head">
+          <span class="sec-num">03 — Features</span>
+          <h2>Built for real remediation work</h2>
+          <p class="lede">Eight capabilities that make the difference between a scan and a fix.</p>
+        </div>
+        <div class="ledger-list">
+          <div class="ledger-row">
+            <span class="no">01</span>
+            <h3>Honest scan coverage</h3>
+            <p>Every scan records which tools ran, failed, or were missing. Reports are labelled incomplete when coverage isn't full — never silently optimistic.</p>
+          </div>
+          <div class="ledger-row">
+            <span class="no">02</span>
+            <h3>Stable fingerprints</h3>
+            <p>Versioned <code>fp2</code> identity built from scanner, rule, path, message, and snippet — stable across line shifts, new exactly when the flagged code changes.</p>
+          </div>
+          <div class="ledger-row">
+            <span class="no">03</span>
+            <h3>Explainable risk scores</h3>
+            <p>Deterministic 0–100 scores where every adjustment is listed: severity base, scanner confidence, evidence quality, category weight. No invented CVSS.</p>
+          </div>
+          <div class="ledger-row">
+            <span class="no">04</span>
+            <h3>Scan history &amp; diffs</h3>
+            <p>Compare any two scans: new, persistent, reintroduced, changed severity, moved location — plus an audit trail of every status transition.</p>
+          </div>
+          <div class="ledger-row">
+            <span class="no">05</span>
+            <h3>Local remediation knowledge</h3>
+            <p>Offline guidance per rule family: why it matters, consequences, a concrete fix, a secure pattern, references. Advice stays separate from evidence.</p>
+          </div>
+          <div class="ledger-row">
+            <span class="no">06</span>
+            <h3>Offline AI review prompts</h3>
+            <p>Generate a reviewer-ready prompt from selected findings — with explicit rules against inventing evidence. Bring your own reviewer, human or AI.</p>
+          </div>
+          <div class="ledger-row">
+            <span class="no">07</span>
+            <h3>Secret redaction on ingest</h3>
+            <p>gitleaks matches, PEM blocks, and common token formats are redacted before anything is stored or rendered. Redaction is hygiene; rotation is the fix.</p>
+          </div>
+          <div class="ledger-row">
+            <span class="no">08</span>
+            <h3>CI-ready exit codes</h3>
+            <p><code>--fail-on high</code> exits 2 on threshold hits, <code>--strict</code> exits 3 on incomplete scans. Documented, tested, GitHub-Actions ready.</p>
+          </div>
         </div>
       </div>
     </section>
@@ -117,14 +211,18 @@
     <!-- ===================================================== HOW IT WORKS -->
     <section id="how" class="section section-alt">
       <div class="container">
-        <h2><span class="section-kicker">How it works</span>From raw scanners to verified fixes</h2>
+        <div class="sec-head">
+          <span class="sec-num">04 — How it works</span>
+          <h2>From raw scanners to verified fixes</h2>
+          <p class="lede">Six deterministic stages. No magic, no black boxes.</p>
+        </div>
         <ol class="steps">
-          <li><strong>Scan or import</strong><span>Run available scanners against your repo, or import existing reports. Tools that are missing are recorded, not hidden.</span></li>
-          <li><strong>Normalize</strong><span>Every result becomes one finding model: normalized severity, confidence, category, evidence, remediation guidance — scanner metadata preserved verbatim.</span></li>
-          <li><strong>Fingerprint & dedup</strong><span>Deterministic sha256 fingerprints merge duplicate sightings while keeping every occurrence's evidence distinct and intact.</span></li>
-          <li><strong>Score & store</strong><span>Explainable risk scores are attached; the scan is committed to your local SQLite ledger as an immutable observation point.</span></li>
-          <li><strong>Compare & verify</strong><span>The next scan is diffed against history. Disappeared findings become resolution candidates — verified fixed only with real scanner coverage.</span></li>
-          <li><strong>Report</strong><span>Generate JSON, Markdown, or single-file HTML reports — with coverage honesty and verification status baked in.</span></li>
+          <li><strong>Scan or import</strong><span>Run installed scanners against the repo, or import existing reports. Every tool's participation is recorded.</span></li>
+          <li><strong>Normalize</strong><span>One finding model: mapped severity, confidence, category, redacted evidence, remediation guidance. Scanner metadata preserved verbatim.</span></li>
+          <li><strong>Fingerprint &amp; dedup</strong><span>Deterministic sha256 identities merge duplicate sightings while every occurrence stays visible as evidence.</span></li>
+          <li><strong>Score &amp; store</strong><span>Explainable risk scores attach to each finding; the scan commits to your local SQLite ledger as an immutable observation.</span></li>
+          <li><strong>Compare &amp; verify</strong><span>The next scan diffs against history. Disappeared findings become resolution candidates — verified only with real coverage.</span></li>
+          <li><strong>Report</strong><span>JSON, Markdown, self-contained HTML, or SARIF — each format stating exactly what coverage the scan had.</span></li>
         </ol>
       </div>
     </section>
@@ -132,24 +230,31 @@
     <!-- ======================================================== SCANNING -->
     <section id="scanning" class="section">
       <div class="container">
-        <h2><span class="section-kicker">Security scanning</span>Run what you have — honestly</h2>
-        <p class="lead">
-          PatchLedger runs the scanners it finds on your machine and records the status of
-          each one. A missing tool is a fact, not a failure: your scan is labelled
-          incomplete and no resolution claims are made on top of it.
-        </p>
-        <div class="scanner-grid">
-          <div class="scanner-item"><div class="name">semgrep</div><div class="desc">Static analysis with community rules (SAST)</div></div>
-          <div class="scanner-item"><div class="name">gitleaks</div><div class="desc">Secrets and credentials in the working tree</div></div>
-          <div class="scanner-item"><div class="name">bandit</div><div class="desc">Python-specific security issues</div></div>
-          <div class="scanner-item"><div class="name">pip-audit</div><div class="desc">Known vulnerabilities in Python dependencies</div></div>
-          <div class="scanner-item"><div class="name">trivy</div><div class="desc">Filesystem scanning via SARIF (when installed)</div></div>
-          <div class="scanner-item"><div class="name">any SARIF</div><div class="desc">Generic SARIF 2.1.0 import for other tools</div></div>
-        </div>
-        <div class="callout">
-          <strong>No downloads, no surprises:</strong> PatchLedger never fetches or executes
-          scanner binaries on its own. It only invokes tools already installed on your
-          system — <code>patchledger doctor</code> tells you what it can see.
+        <div class="scan-split">
+          <div>
+            <div class="sec-head">
+              <span class="sec-num">05 — Security scanning</span>
+              <h2>Run what you have — honestly</h2>
+              <p class="lede">
+                PatchLedger invokes the scanners it finds on your machine and records
+                each one's status. A missing tool is a fact, not a failure: the scan is
+                labelled incomplete and no resolution claims are built on top of it.
+              </p>
+            </div>
+            <div class="callout">
+              <strong>No downloads, no surprises.</strong> PatchLedger never fetches or
+              executes scanner binaries on its own — it only runs tools you installed.
+              <code style="background:rgba(70,194,110,.08)">patchledger doctor</code> shows exactly what it can see.
+            </div>
+          </div>
+          <div class="tool-list" aria-label="Supported scanners">
+            <div class="tool-row"><span class="name">semgrep</span><span class="desc">Broad community SAST rules</span></div>
+            <div class="tool-row"><span class="name">bandit</span><span class="desc">Python-specific security issues</span></div>
+            <div class="tool-row"><span class="name">pip-audit</span><span class="desc">Known vulnerabilities in Python dependencies</span></div>
+            <div class="tool-row"><span class="name">gitleaks</span><span class="desc">Secrets in the working tree and git history</span></div>
+            <div class="tool-row"><span class="name">trivy</span><span class="desc">Filesystem scanning via SARIF (when installed)</span></div>
+            <div class="tool-row"><span class="name">any SARIF</span><span class="desc">Generic SARIF 2.1.0 import for other tools</span></div>
+          </div>
         </div>
       </div>
     </section>
@@ -157,17 +262,36 @@
     <!-- ==================================================== NORMALIZATION -->
     <section id="normalization" class="section section-alt">
       <div class="container">
-        <h2><span class="section-kicker">Finding normalization</span>One consistent data model</h2>
-        <p class="lead">
-          Every scanner's raw result is mapped through explicit, documented tables — severity
-          is never invented, unknown values stay unknown, and each finding keeps its original
-          scanner metadata alongside the normalized view.
-        </p>
-        <div class="cards">
-          <div class="card"><h3>Explicit severity mapping</h3><p>semgrep <code>ERROR</code>, bandit <code>HIGH</code>, SARIF <code>error</code> — all map to one scale, with the raw value preserved for audit.</p></div>
-          <div class="card"><h3>Content-stable fingerprints</h3><p><code>sha256(scanner, rule, path, message, snippet)</code> — stable across line shifts, versioned as <code>fp2</code>, documented with its limits.</p></div>
-          <div class="card"><h3>Dedup with receipts</h3><p>Identical findings merge into one ledger entry; every merged sighting stays listed as an occurrence with its own evidence.</p></div>
-          <div class="card"><h3>Secrets redacted on ingest</h3><p>gitleaks matches, PEM blocks, and common token formats are redacted before storage. The fix is still rotation — redaction just stops re-leaking.</p></div>
+        <div class="sec-head">
+          <span class="sec-num">06 — Finding normalization</span>
+          <h2>One consistent data model</h2>
+          <p class="lede">
+            Every scanner's raw result maps through explicit, documented tables.
+            Severity is never invented; unknown values stay unknown; original scanner
+            metadata rides along untouched.
+          </p>
+        </div>
+        <div class="ledger-list">
+          <div class="ledger-row">
+            <span class="no">map</span>
+            <h3>Explicit severity tables</h3>
+            <p>semgrep <code>ERROR</code>, bandit <code>HIGH</code>, SARIF <code>error</code> — one normalized scale, with the raw value kept for audit.</p>
+          </div>
+          <div class="ledger-row">
+            <span class="no">fp2</span>
+            <h3>Content-stable fingerprints</h3>
+            <p><code>sha256(scanner, rule, path, message, snippet)</code> — stable across line shifts, versioned, documented with its limits.</p>
+          </div>
+          <div class="ledger-row">
+            <span class="no">≡</span>
+            <h3>Dedup with receipts</h3>
+            <p>Identical findings merge into one entry; every merged sighting stays listed as an occurrence with its own evidence.</p>
+          </div>
+          <div class="ledger-row">
+            <span class="no">***</span>
+            <h3>Secrets redacted on ingest</h3>
+            <p>gitleaks matches, PEM blocks, and common token formats are redacted before storage — and again in every renderer.</p>
+          </div>
         </div>
       </div>
     </section>
@@ -175,29 +299,42 @@
     <!-- ===================================================== VERIFICATION -->
     <section id="verification" class="section">
       <div class="container">
-        <h2><span class="section-kicker">Patch verification</span>Never call it fixed without proof</h2>
-        <p class="lead">
-          After you change code and rescan, a vanished finding is only a
-          <em>resolution candidate</em>. PatchLedger verifies the candidate against the
-          evidence: did every scanner that ever reported this finding actually run, succeed,
-          and cover the same target? Only then is it <strong>fixed and verified</strong>.
-        </p>
-        <div class="state-badges" aria-label="Finding states">
-          <span class="state-badge ok">fixed_verified</span>
-          <span class="state-badge info">still_present</span>
-          <span class="state-badge bad">reintroduced</span>
-          <span class="state-badge warn">inconclusive</span>
-        </div>
-        <div class="cards">
-          <div class="card"><h3>Missing scanner ⇒ inconclusive</h3><p>semgrep reported it last time but didn't run now? Inconclusive. The finding stays effectively open, with the reason recorded.</p></div>
-          <div class="card"><h3>Failed scan ⇒ inconclusive</h3><p>A scanner that exited with errors cannot confirm absence. Verification refuses to inherit someone else's crash as your fix.</p></div>
-          <div class="card"><h3>Imported reports ⇒ inconclusive</h3><p>Imported results can't assert local coverage. Verification against them stays inconclusive by design — documented, not hidden.</p></div>
-          <div class="card"><h3>Everything ran ⇒ verified</h3><p>All reporting scanners succeeded on the same target? The finding is marked resolved with the evidence trail attached. Version changes are recorded as caveats.</p></div>
-        </div>
-        <div class="callout">
-          <strong>Why this matters:</strong> false "resolved" states are how regressions slip
-          into production. An honest <em>inconclusive</em> costs a re-run; a false
-          <em>fixed</em> costs a breach.
+        <div class="verify-split">
+          <div>
+            <div class="sec-head">
+              <span class="sec-num">07 — Patch verification</span>
+              <h2>Never call it fixed without proof</h2>
+              <p class="lede">
+                After you change code and rescan, a vanished finding is only a
+                <em>resolution candidate</em>. It becomes <strong>fixed and verified</strong>
+                only when every scanner that ever reported it ran successfully against
+                the same target. Otherwise it stays inconclusive — and inconclusive
+                is never treated as fixed.
+              </p>
+            </div>
+            <div class="callout">
+              <strong>Why it matters:</strong> an honest <em>inconclusive</em> costs a re-run.
+              A false <em>fixed</em> costs a breach.
+            </div>
+          </div>
+          <div class="state-list" aria-label="Verification states">
+            <div class="state-row">
+              <span class="state-badge ok">fixed_verified</span>
+              <span class="why">All reporting scanners ran successfully on the same target — proof attached.</span>
+            </div>
+            <div class="state-row">
+              <span class="state-badge info">still_present</span>
+              <span class="why">The fingerprint reappears in the latest scan.</span>
+            </div>
+            <div class="state-row">
+              <span class="state-badge bad">reintroduced</span>
+              <span class="why">Was verified fixed — and has come back. Escalated loudly.</span>
+            </div>
+            <div class="state-row">
+              <span class="state-badge warn">inconclusive</span>
+              <span class="why">Missing or failed scanner, imported report, or different target — the reason is recorded.</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -205,33 +342,32 @@
     <!-- =============================================================== CLI -->
     <section id="cli" class="section section-alt">
       <div class="container">
-        <h2><span class="section-kicker">CLI examples</span>Everything from the terminal</h2>
-        <div class="terminal" role="img" aria-label="Terminal session showing PatchLedger commands">
-          <div class="terminal-bar" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="sec-head">
+          <span class="sec-num">08 — CLI examples</span>
+          <h2>Everything from the terminal</h2>
+          <p class="lede">Eleven commands, documented exit codes, Rich output. No daemon, no dashboard required.</p>
+        </div>
+        <div class="terminal">
+          <div class="terminal-bar" aria-hidden="true"><i></i><i></i><i></i><span>everyday workflow</span></div>
           <pre><span class="c-prompt">$</span> <span class="c-cmd">patchledger init</span>
 <span class="c-out">Initialized PatchLedger project for /home/dev/my-project</span>
 
 <span class="c-prompt">$</span> <span class="c-cmd">patchledger scan .</span>
-<span class="c-out">┌ Scanner coverage ┐ semgrep: ran · bandit: ran · pip-audit: ran · gitleaks: unavailable</span>
 <span class="c-out">Scan 63c0fe0d stored: 7 findings, 2 duplicates merged</span>
-<span class="c-warn">⚠ Incomplete coverage — resolution claims will be treated as unverified</span>
+<span class="c-warn">⚠ Incomplete coverage — resolution claims stay unverified</span>
 
 <span class="c-prompt">$</span> <span class="c-cmd">patchledger findings</span>
-<span class="c-out">open    high   75  semgrep   subprocess-shell-true   app/jobs.py:87</span>
-<span class="c-out">open    high   80  gitleaks  aws-access-token        config/settings.py:12</span>
-<span class="c-ok">resolved high  —   pip-audit PYSEC-2023-62           (verified: all scanners ran)</span>
-
-<span class="c-prompt">$</span> <span class="c-cmd">patchledger verify</span>
-<span class="c-ok">  FIXED VERIFIED</span> <span class="c-out">fp2:0db0… — all reporting scanners ran successfully</span>
-<span class="c-warn">  INCONCLUSIVE</span>  <span class="c-out">fp2:91ac… — scanner gitleaks did not run in the current scan</span></pre>
+<span class="c-out">open      high  75  semgrep   subprocess-shell-true   app/jobs.py:87</span>
+<span class="c-out">open      high  80  bandit    B608                    app/db.py:133</span>
+<span class="c-ok">resolved  high  —   pip-audit PYSEC-2023-62          (verified: coverage ok)</span></pre>
         </div>
         <div class="terminal">
-          <div class="terminal-bar" aria-hidden="true"><i></i><i></i><i></i></div>
-          <pre><span class="c-prompt">$</span> <span class="c-cmd">patchledger import</span> sarif-from-ci.sarif <span class="c-flag">--target</span> .
-<span class="c-prompt">$</span> <span class="c-cmd">patchledger report</span> <span class="c-flag">--format</span> html <span class="c-flag">--output</span> report.html
-<span class="c-prompt">$</span> <span class="c-cmd">patchledger export-ai</span> <span class="c-flag">--output</span> review-prompt.md
-<span class="c-prompt">$</span> <span class="c-cmd">patchledger doctor</span>  <span class="c-out"># installation health: python, scanners, db, config</span>
-<span class="c-prompt">$</span> <span class="c-cmd">patchledger scan .</span> <span class="c-flag">--fail-on</span> high <span class="c-flag">--strict</span>  <span class="c-out"># CI gate: exit 2 / 3</span></pre>
+          <div class="terminal-bar" aria-hidden="true"><i></i><i></i><i></i><span>imports, reports, review</span></div>
+          <pre><span class="c-prompt">$</span> <span class="c-cmd">patchledger import</span> ci-results.sarif <span class="c-cmd">--target</span> .
+<span class="c-prompt">$</span> <span class="c-cmd">patchledger report</span> <span class="c-cmd">--format</span> sarif   <span class="c-dim"># GitHub code scanning ingest</span>
+<span class="c-prompt">$</span> <span class="c-cmd">patchledger export-ai</span> <span class="c-cmd">--min-severity</span> high <span class="c-cmd">--output</span> review.md
+<span class="c-prompt">$</span> <span class="c-cmd">patchledger doctor</span>                   <span class="c-dim"># what can PatchLedger see?</span>
+<span class="c-prompt">$</span> <span class="c-cmd">patchledger scan .</span> <span class="c-cmd">--fail-on</span> high <span class="c-cmd">--strict</span>  <span class="c-dim"># CI gate: exit 2 / 3</span></pre>
         </div>
       </div>
     </section>
@@ -239,52 +375,66 @@
     <!-- =========================================================== REPORT -->
     <section id="report" class="section">
       <div class="container">
-        <h2><span class="section-kicker">Example report</span>What you get</h2>
-        <p class="lead">
-          Self-contained dark HTML reports — no JavaScript, fully escaped, viewable offline.
-          This preview shows the structure with <strong>synthetic example data</strong>.
-        </p>
-        <div class="report-demo">
-          <div class="report-demo-head">
-            <span>PatchLedger Security Report — <strong>example-project (synthetic)</strong></span>
-            <span class="tag resolved">SYNTHETIC EXAMPLE DATA</span>
+        <div class="sec-head">
+          <span class="sec-num">09 — Example report</span>
+          <h2>What you get</h2>
+          <p class="lede">
+            Self-contained dark HTML — no JavaScript, fully escaped, CSP-protected,
+            readable offline. Below: the structure, with
+            <strong>synthetic example data</strong>.
+          </p>
+        </div>
+        <div class="browser">
+          <div class="browser-bar" aria-hidden="true">
+            <span class="dots"><i></i><i></i><i></i></span>
+            <span class="url">patchledger-report-63c0fe0d.html</span>
           </div>
-          <div class="report-demo-body">
+          <div class="browser-body">
+            <div class="report-title-row">
+              <span class="t">Security Report — example-project (synthetic)</span>
+              <span class="tag synth">synthetic example data</span>
+            </div>
             <div class="report-meta">
-              <div><span class="k">Status</span> <strong>FAIL (incomplete coverage)</strong></div>
-              <div><span class="k">Scan</span> <code>63c0fe0d…</code></div>
-              <div><span class="k">Created</span> 2026-11-11 12:00 UTC</div>
-              <div><span class="k">Git</span> <code>0f1e2d3c4b5a</code> on main</div>
+              <span>Status <b>FAIL · incomplete coverage</b></span>
+              <span>Scan <b>63c0fe0d…</b></span>
+              <span>Git <b>0f1e2d3c4b5a</b> on main</span>
             </div>
-            <div class="counts-row" aria-label="Severity counts">
-              <div class="count-chip"><div class="n sev-critical">0</div><div class="l">critical</div></div>
-              <div class="count-chip"><div class="n sev-high">3</div><div class="l">high</div></div>
-              <div class="count-chip"><div class="n sev-medium">0</div><div class="l">medium</div></div>
-              <div class="count-chip"><div class="n sev-low">1</div><div class="l">low</div></div>
-              <div class="count-chip"><div class="n">6</div><div class="l">total</div></div>
+            <div class="sev-strip" aria-label="Severity counts">
+              <div class="sev-chip"><div class="n sev-critical">0</div><div class="l">critical</div></div>
+              <div class="sev-chip"><div class="n sev-high">3</div><div class="l">high</div></div>
+              <div class="sev-chip"><div class="n sev-medium">0</div><div class="l">medium</div></div>
+              <div class="sev-chip"><div class="n sev-low">1</div><div class="l">low</div></div>
             </div>
             <div class="finding-row">
-              <span class="tag high">high</span><span class="title">AWS Access Key</span>
-              <div class="meta">gitleaks · aws-access-token · config/settings.py:12 · [secret redacted: AKIA…]</div>
+              <span class="tag high">high</span><span class="t">AWS Access Key</span>
+              <span class="m">gitleaks · aws-access-token · settings.py:12</span>
             </div>
             <div class="finding-row">
-              <span class="tag high">high</span><span class="title">Subprocess with shell=True</span>
-              <div class="meta">semgrep · subprocess-shell-true · app/jobs.py:87 · score 85</div>
+              <span class="tag high">high</span><span class="t">Subprocess with shell=True</span>
+              <span class="m">semgrep · score 85 · app/jobs.py:87</span>
             </div>
             <div class="finding-row">
-              <span class="tag high">high</span><span class="title">Possible SQL injection via string use</span>
-              <div class="meta">bandit · B608 · app/db.py:133 · score 85</div>
+              <span class="tag high">high</span><span class="t">Possible SQL injection via string use</span>
+              <span class="m">bandit · B608 · score 85 · app/db.py:133</span>
             </div>
             <div class="finding-row">
-              <span class="tag low">low</span><span class="title">Use of assert detected</span>
-              <div class="meta">bandit · B101 · app/validate.py:22 · score 20</div>
+              <span class="tag resolved">verified fixed</span><span class="t">Vulnerable dependency: flask 0.12.4</span>
+              <span class="m">pip-audit · PYSEC-2023-62 · coverage ok</span>
+            </div>
+            <div class="finding-row">
+              <span class="tag low">low</span><span class="t">Use of assert detected</span>
+              <span class="m">bandit · B101 · score 20 · app/validate.py:22</span>
+            </div>
+            <div class="report-footnote">
+              Evidence is scanner-reported and redacted; remediation text is advice from
+              the local knowledge base. This report contains no JavaScript.
             </div>
           </div>
         </div>
-        <p style="color:var(--muted); font-size: 0.9rem; margin-top: 1rem;">
-          Full generated examples (JSON / Markdown / HTML) live in the repository under
-          <a href="https://github.com/navairgap/patchledger/tree/main/examples" rel="noopener">examples/</a> —
-          produced by the real reporters from clearly-labelled synthetic findings.
+        <p class="report-footnote" style="margin-top:16px">
+          Fully generated examples (JSON / Markdown / HTML) live in the repository under
+          <a href="https://github.com/navairgap/patchledger/tree/main/examples" rel="noopener">examples/</a>
+          — produced by the real reporters from clearly-labelled synthetic findings.
         </p>
       </div>
     </section>
@@ -292,41 +442,38 @@
     <!-- ====================================================== ARCHITECTURE -->
     <section id="architecture" class="section section-alt">
       <div class="container">
-        <h2><span class="section-kicker">Architecture</span>Modular, local-first, boring on purpose</h2>
-        <p class="lead">
-          Python 3.10+, Typer CLI, Pydantic models, SQLite storage, Rich terminal output.
-          No server required, no telemetry, no network after installation.
-        </p>
+        <div class="sec-head">
+          <span class="sec-num">10 — Architecture</span>
+          <h2>Modular, local-first, boring on purpose</h2>
+          <p class="lede">
+            Python 3.10+, Typer, Pydantic, SQLite, Rich. Three runtime dependencies.
+            No server, no telemetry, no network after installation.
+          </p>
+        </div>
         <div class="arch" role="img" aria-label="Architecture diagram">
 <pre>  Repository (your code, local)
         |
         v
-  Scanner runner ──► semgrep / gitleaks / bandit / pip-audit / trivy (as installed)
-        |                missing tools recorded as <span class="flow-good">unavailable</span>, honestly
+  Scanner runner ──► semgrep / gitleaks / bandit / pip-audit / trivy
+        |              missing tools recorded as <span class="g">unavailable</span>, honestly
         v
-  Parsers (SARIF 2.1.0 · semgrep JSON · gitleaks JSON · bandit JSON · pip-audit JSON)
-        |          safe JSON loading: size caps, strict errors, no code execution
+  Parsers ──── SARIF 2.1.0 · semgrep JSON · gitleaks JSON · bandit JSON · pip-audit JSON
+        |        safe loading: size caps, strict errors, no code execution
         v
   Normalizer ──► severity maps · redaction · categories · remediation KB
         |
         v
-  Fingerprints (fp2, deterministic sha256) ──► Deduplication (occurrences preserved)
+  Fingerprints (fp2) ──► Dedup (occurrences preserved) ──► Scoring (explainable)
         |
         v
-  Risk scoring (explainable, configurable) ──► SQLite ledger (WAL, migrations, audit trail)
+  SQLite ledger ── immutable scans · occurrences · status audit trail
         |
         +──────────────────┬──────────────────┐
         v                  v                  v
-  Scan comparison    Patch verification   Reports (JSON / MD / HTML)
-        |                  |                  (self-contained, no JS, escaped)
+  Scan comparison    Patch verification   Reports (JSON / MD / HTML / SARIF)
         └──────────────────┴──────────────────┘
                            v
-                     CLI (Typer + Rich)  ·  GitHub Actions integration</pre>
-        </div>
-        <div class="cards">
-          <div class="card"><h3>Immutable scans</h3><p>Each scan is an observation point; history is a query across scans plus an explicit status audit trail.</p></div>
-          <div class="card"><h3>Versioned everything</h3><p>Schema migrations and fingerprint versions are part of the design — the ledger stays maintainable.</p></div>
-          <div class="card"><h3>Security-product hygiene</h3><p>Argv-list subprocesses, no shell, no auto-downloads, escaped HTML with CSP, path validation, no secrets in output.</p></div>
+                     CLI (Typer + Rich) · GitHub Actions</pre>
         </div>
       </div>
     </section>
@@ -334,38 +481,36 @@
     <!-- ====================================================== INSTALLATION -->
     <section id="installation" class="section">
       <div class="container">
-        <h2><span class="section-kicker">Installation</span>Up and running in two minutes</h2>
-        <div class="install-grid">
-          <div class="install-box">
-            <h3>1 · Install PatchLedger</h3>
-            <pre>$ pipx install patchledger
-# or: pip install patchledger
-# dev: git clone + pip install -e .[dev]</pre>
-          </div>
-          <div class="install-box">
-            <h3>2 · Check your scanners</h3>
-            <pre>$ patchledger doctor
-# install any you want: pip install bandit pip-audit
-# semgrep: pip install semgrep · gitleaks/trivy: system pkg</pre>
-          </div>
-          <div class="install-box">
-            <h3>3 · Scan your repo</h3>
-            <pre>$ cd your-project
-$ patchledger init
-$ patchledger scan .
-$ patchledger findings</pre>
-          </div>
-          <div class="install-box">
-            <h3>4 · Verify a fix</h3>
-            <pre>$ # ...fix the code...
-$ patchledger scan .
-$ patchledger verify
-$ patchledger report --format html</pre>
-          </div>
+        <div class="sec-head">
+          <span class="sec-num">11 — Installation</span>
+          <h2>Up and running in two minutes</h2>
+          <p class="lede">Python 3.10+ required. Everything else is optional and reported honestly.</p>
         </div>
-        <div class="callout">
-          <strong>Requires:</strong> Python 3.10+. Everything else is optional — PatchLedger
-          degrades gracefully and tells you exactly what coverage you have.
+        <div class="install-grid">
+          <div class="install-step">
+            <div class="step-k"><span class="n">01</span><h3>Install PatchLedger</h3></div>
+            <pre><span class="c-prompt">$</span> pipx install patchledger
+<span class="c-dim"># or: pip install patchledger
+# dev: pip install -e ".[dev]"</span></pre>
+          </div>
+          <div class="install-step">
+            <div class="step-k"><span class="n">02</span><h3>Check your scanners</h3></div>
+            <pre><span class="c-prompt">$</span> patchledger doctor
+<span class="c-dim"># widen coverage: pip install bandit
+# pip-audit semgrep · gitleaks/trivy: system pkg</span></pre>
+          </div>
+          <div class="install-step">
+            <div class="step-k"><span class="n">03</span><h3>Scan your repo</h3></div>
+            <pre><span class="c-prompt">$</span> cd your-project
+<span class="c-prompt">$</span> patchledger init
+<span class="c-prompt">$</span> patchledger scan .</pre>
+          </div>
+          <div class="install-step">
+            <div class="step-k"><span class="n">04</span><h3>Verify a fix</h3></div>
+            <pre><span class="c-prompt">$</span> patchledger scan .
+<span class="c-prompt">$</span> patchledger verify
+<span class="c-prompt">$</span> patchledger report --format html</pre>
+          </div>
         </div>
       </div>
     </section>
@@ -373,14 +518,42 @@ $ patchledger report --format html</pre>
     <!-- ============================================================== DOCS -->
     <section id="docs" class="section section-alt">
       <div class="container">
-        <h2><span class="section-kicker">Documentation</span>Read the details</h2>
-        <div class="cards">
-          <div class="card"><h3><a href="https://github.com/navairgap/patchledger/blob/main/docs/installation.md" rel="noopener">Installation guide</a></h3><p>Per-scanner setup, optional tools, and what each one adds to your coverage.</p></div>
-          <div class="card"><h3><a href="https://github.com/navairgap/patchledger/blob/main/docs/usage.md" rel="noopener">Usage handbook</a></h3><p>Every command, every flag, exit codes for CI, and the recommended workflow.</p></div>
-          <div class="card"><h3><a href="https://github.com/navairgap/patchledger/blob/main/docs/architecture.md" rel="noopener">Architecture</a></h3><p>Data model, fingerprint design, verification semantics, and storage schema.</p></div>
-          <div class="card"><h3><a href="https://github.com/navairgap/patchledger/blob/main/docs/security-model.md" rel="noopener">Security model</a></h3><p>Threat model, redaction rules, what PatchLedger never does with your code.</p></div>
-          <div class="card"><h3><a href="https://github.com/navairgap/patchledger/blob/main/docs/example-workflow.md" rel="noopener">GitHub Actions</a></h3><p>Copy-paste workflow for your repository with thresholds and artifacts.</p></div>
-          <div class="card"><h3><a href="https://github.com/navairgap/patchledger/blob/main/docs/faq.md" rel="noopener">FAQ</a></h3><p>Common questions about coverage, fingerprints, and the no-AI design.</p></div>
+        <div class="sec-head">
+          <span class="sec-num">12 — Documentation</span>
+          <h2>Read the details</h2>
+          <p class="lede">Every design decision is written down — including the limits.</p>
+        </div>
+        <div class="doc-rows">
+          <div class="doc-row">
+            <h3><a href="https://github.com/navairgap/patchledger/blob/main/docs/installation.md" rel="noopener">Installation guide</a></h3>
+            <p>Per-scanner setup and what each tool adds to your coverage.</p>
+            <span class="arrow">→</span>
+          </div>
+          <div class="doc-row">
+            <h3><a href="https://github.com/navairgap/patchledger/blob/main/docs/usage.md" rel="noopener">Usage handbook</a></h3>
+            <p>Every command, every flag, exit codes for CI, the recommended workflow.</p>
+            <span class="arrow">→</span>
+          </div>
+          <div class="doc-row">
+            <h3><a href="https://github.com/navairgap/patchledger/blob/main/docs/architecture.md" rel="noopener">Architecture</a></h3>
+            <p>Data model, fingerprint design, verification semantics, storage schema.</p>
+            <span class="arrow">→</span>
+          </div>
+          <div class="doc-row">
+            <h3><a href="https://github.com/navairgap/patchledger/blob/main/docs/security-model.md" rel="noopener">Security model</a></h3>
+            <p>Threat model, redaction rules, what PatchLedger never does with your code.</p>
+            <span class="arrow">→</span>
+          </div>
+          <div class="doc-row">
+            <h3><a href="https://github.com/navairgap/patchledger/blob/main/docs/example-workflow.md" rel="noopener">GitHub Actions</a></h3>
+            <p>Copy-paste workflow for your repository, with thresholds and artifacts.</p>
+            <span class="arrow">→</span>
+          </div>
+          <div class="doc-row">
+            <h3><a href="https://github.com/navairgap/patchledger/blob/main/docs/faq.md" rel="noopener">FAQ</a></h3>
+            <p>The no-AI design, fingerprint behavior, sharing reports safely.</p>
+            <span class="arrow">→</span>
+          </div>
         </div>
       </div>
     </section>
@@ -388,18 +561,32 @@ $ patchledger report --format html</pre>
     <!-- ====================================================== CONTRIBUTING -->
     <section id="contributing" class="section">
       <div class="container">
-        <h2><span class="section-kicker">Contributing</span>PRs welcome</h2>
-        <p class="lead">
-          Bug reports, scanner parsers, remediation-knowledge entries, and documentation are
-          all first-class contributions. Start with
-          <a href="https://github.com/navairgap/patchledger/blob/main/CONTRIBUTING.md" rel="noopener">CONTRIBUTING.md</a>
-          — the test suite runs in seconds and <code>ruff</code> + <code>mypy</code> keep the
-          codebase honest.
-        </p>
-        <div class="callout">
-          Security issues: please report privately via
-          <a href="https://github.com/navairgap/patchledger/blob/main/SECURITY.md" rel="noopener">SECURITY.md</a>
-          rather than opening a public issue.
+        <div class="contrib-split">
+          <div>
+            <div class="sec-head">
+              <span class="sec-num">13 — Contributing</span>
+              <h2>PRs welcome</h2>
+              <p class="lede">
+                Bug reports, parser adapters, remediation-knowledge entries, and
+                documentation are all first-class contributions. The test suite runs in
+                seconds; <code style="background:rgba(70,194,110,.08)">ruff</code> and
+                <code style="background:rgba(70,194,110,.08)">mypy</code> keep the codebase
+                honest. Start with
+                <a href="https://github.com/navairgap/patchledger/blob/main/CONTRIBUTING.md" rel="noopener">CONTRIBUTING.md</a>.
+              </p>
+            </div>
+            <div class="callout">
+              <strong>Security issues:</strong> please report privately via
+              <a href="https://github.com/navairgap/patchledger/blob/main/SECURITY.md" rel="noopener">SECURITY.md</a>
+              rather than opening a public issue.
+            </div>
+          </div>
+          <div class="tool-list" aria-label="Good first contributions">
+            <div class="tool-row"><span class="name">parsers</span><span class="desc">trivy JSON, npm audit, OSV, cargo-audit</span></div>
+            <div class="tool-row"><span class="name">knowledge</span><span class="desc">remediation entries for more rule families</span></div>
+            <div class="tool-row"><span class="name">platform</span><span class="desc">Windows/macOS CI coverage and fixes</span></div>
+            <div class="tool-row"><span class="name">output</span><span class="desc">report themes, more export targets</span></div>
+          </div>
         </div>
       </div>
     </section>
@@ -407,16 +594,46 @@ $ patchledger report --format html</pre>
     <!-- ========================================================== ROADMAP -->
     <section id="roadmap" class="section section-alt">
       <div class="container">
-        <h2><span class="section-kicker">Roadmap</span>Where this is heading</h2>
+        <div class="sec-head">
+          <span class="sec-num">14 — Roadmap</span>
+          <h2>Where this is heading</h2>
+          <p class="lede">Shipped claims stay on this page only after they ship.</p>
+        </div>
         <div class="roadmap-grid">
-          <div class="roadmap-col"><h3>Now (v0.1)</h3>
-            <ul><li>Core pipeline: scan → normalize → verify</li><li>5 parsers + generic SARIF import</li><li>JSON / Markdown / HTML / SARIF reports</li><li>Full CLI + GitHub Actions recipe</li></ul></div>
-          <div class="roadmap-col"><h3>Next</h3>
-            <ul><li>PyPI release & <code>pipx</code> install</li><li>Baseline verification across CI runs</li><li>More remediation-knowledge entries</li><li>Trusted publishing to PyPI</li></ul></div>
-          <div class="roadmap-col"><h3>Later</h3>
-            <ul><li>Optional BYOK AI provider (disabled by default)</li><li>Trivy/gitleaks native JSON parsers</li><li>Configurable report branding</li></ul></div>
-          <div class="roadmap-col"><h3>Non-goals</h3>
-            <ul><li>No hosted SaaS, no telemetry</li><li>No mandatory AI subscription</li><li>No automatic code modification</li></ul></div>
+          <div class="roadmap-col">
+            <h3>Now — v0.1</h3>
+            <ul>
+              <li>Core pipeline: scan → normalize → verify</li>
+              <li>5 parsers + generic SARIF import</li>
+              <li>JSON / Markdown / HTML / SARIF reports</li>
+              <li>Full CLI + GitHub Actions recipe</li>
+            </ul>
+          </div>
+          <div class="roadmap-col">
+            <h3>Next</h3>
+            <ul>
+              <li>PyPI release &amp; <code>pipx</code> install</li>
+              <li>Baseline verification across CI runs</li>
+              <li>More remediation-knowledge entries</li>
+              <li>Trusted publishing to PyPI</li>
+            </ul>
+          </div>
+          <div class="roadmap-col">
+            <h3>Later</h3>
+            <ul>
+              <li>Optional BYOK AI provider (disabled by default)</li>
+              <li>Native gitleaks / trivy JSON parsers</li>
+              <li>Configurable report branding</li>
+            </ul>
+          </div>
+          <div class="roadmap-col non-goals">
+            <h3>Non-goals</h3>
+            <ul>
+              <li>No hosted SaaS, no telemetry</li>
+              <li>No mandatory AI subscription</li>
+              <li>No automatic code modification</li>
+            </ul>
+          </div>
         </div>
       </div>
     </section>
@@ -424,25 +641,50 @@ $ patchledger report --format html</pre>
     <!-- ========================================================== LICENSE -->
     <section id="license" class="section">
       <div class="container">
-        <h2><span class="section-kicker">License</span>MIT</h2>
-        <p class="lead">
-          PatchLedger is released under the
-          <a href="https://github.com/navairgap/patchledger/blob/main/LICENSE" rel="noopener">MIT license</a>.
-          It uses permissively-licensed third-party libraries only (see
-          <code>pyproject.toml</code> for the short runtime dependency list).
-        </p>
+        <div class="sec-head">
+          <span class="sec-num">15 — License</span>
+          <h2>MIT</h2>
+          <p class="lede">
+            PatchLedger is released under the
+            <a href="https://github.com/navairgap/patchledger/blob/main/LICENSE" rel="noopener">MIT license</a>.
+            Permissively-licensed third-party libraries only — see
+            <a href="https://github.com/navairgap/patchledger/blob/main/pyproject.toml" rel="noopener"><code>pyproject.toml</code></a>
+            for the short runtime dependency list.
+          </p>
+        </div>
       </div>
     </section>
   </main>
 
   <footer class="site-footer">
     <div class="container">
-      <span>PatchLedger — evidence-first security verification. Built to be maintained, not to impress.</span>
-      <span>
-        <a href="https://github.com/navairgap/patchledger" rel="noopener">GitHub</a> ·
-        <a href="https://github.com/navairgap/patchledger/issues" rel="noopener">Issues</a> ·
-        <a href="https://github.com/navairgap/patchledger/blob/main/CHANGELOG.md" rel="noopener">Changelog</a>
-      </span>
+      <div class="footer-grid">
+        <div>
+          <a class="brand" href="#top">
+            <span class="brand-mark" aria-hidden="true"><i></i><i></i></span>
+            PatchLedger
+          </a>
+          <p>Evidence-first security verification. Built to be maintained, not to impress — every claim on this page traces to a test.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Project</h4>
+          <a href="https://github.com/navairgap/patchledger" rel="noopener">GitHub</a>
+          <a href="https://github.com/navairgap/patchledger/issues" rel="noopener">Issues</a>
+          <a href="https://github.com/navairgap/patchledger/blob/main/CHANGELOG.md" rel="noopener">Changelog</a>
+          <a href="https://github.com/navairgap/patchledger/blob/main/CONTRIBUTING.md" rel="noopener">Contributing</a>
+        </div>
+        <div class="footer-col">
+          <h4>Docs</h4>
+          <a href="https://github.com/navairgap/patchledger/blob/main/docs/installation.md" rel="noopener">Installation</a>
+          <a href="https://github.com/navairgap/patchledger/blob/main/docs/usage.md" rel="noopener">Usage</a>
+          <a href="https://github.com/navairgap/patchledger/blob/main/docs/architecture.md" rel="noopener">Architecture</a>
+          <a href="https://github.com/navairgap/patchledger/blob/main/docs/security-model.md" rel="noopener">Security model</a>
+        </div>
+      </div>
+      <div class="footer-base">
+        <span>© 2026 navairgap and PatchLedger contributors · MIT</span>
+        <span class="no-ai">no AI API · no cloud · no telemetry</span>
+      </div>
     </div>
   </footer>
 
