@@ -318,3 +318,12 @@ def test_export_ai_min_severity(tmp_path, monkeypatch):
     content = out.read_text(encoding="utf-8")
     assert "high-one" in content
     assert "low-one" not in content
+
+
+def test_version_matches_package_metadata():
+    from patchledger import __version__
+
+    result = runner.invoke(app, ["version"])
+    assert result.exit_code == 0
+    assert __version__ in result.output
+    assert __version__ == "0.1.1"  # keep in sync with pyproject.toml on release
