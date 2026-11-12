@@ -77,6 +77,7 @@ def scan_repository(
     target: Path,
     config: PatchLedgerConfig,
     enabled: list[str] | None = None,
+    label: str | None = None,
 ) -> ScanRunResult:
     """Run available scanners against the target and store one scan."""
     target = resolve_target(target)
@@ -92,6 +93,7 @@ def scan_repository(
         project_id=project.id,
         target_path=str(target),
         source=ScanSource.SCAN,
+        label=label,
         git_commit=commit,
         git_branch=branch,
         tools=_dedupe_tools(

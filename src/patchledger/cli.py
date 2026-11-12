@@ -177,7 +177,11 @@ def _ledger_changes(entries: list[LedgerEntry]) -> dict[str, int]:
 
 
 def _filter_ledger(
-    entries: Iterable[LedgerEntry], severity: str | None, status: str | None, scanner: str | None
+    entries: Iterable[LedgerEntry],
+    severity: str | None,
+    status: str | None,
+    scanner: str | None,
+    rule: str | None = None,
 ) -> list[LedgerEntry]:
     result = []
     for entry in entries:
@@ -186,6 +190,8 @@ def _filter_ledger(
         if status and entry.status.value != status:
             continue
         if scanner and entry.finding.scanner != scanner:
+            continue
+        if rule and rule.lower() not in entry.finding.rule_id.lower():
             continue
         result.append(entry)
     return result
@@ -244,6 +250,7 @@ def scan(
     scanner: list[str] = typer.Option(
         None, "--scanner", help="Run only these scanners (repeatable). Overrides config."
     ),
+    label: str = typer.Option(None, "--label", help="Label for the stored scan."),
 ) -> int:
     """Run available scanners, normalize findings, store one scan."""
     from patchledger.pipeline import scan_repository
@@ -254,7 +261,7 @@ def scan(
     db, config = _require_db()
 
     with console.status("Scanning…"):
-        result = scan_repository(db, target, config, enabled=scanner)
+        result = scan_repository(db, target, config, enabled=scanner, label=label)
 
     _print_tool_table(result.scan)
     console.print(
@@ -342,13 +349,14 @@ def findings(
     severity: str = typer.Option(None, "--severity", help="Only at/above this severity."),
     status: str = typer.Option(None, "--status", help="open|resolved|reintroduced|inconclusive."),
     scanner: str = typer.Option(None, "--scanner", help="Only this scanner."),
+    rule: str = typer.Option(None, "--rule", help="Substring match on the rule id."),
     json_output: bool = typer.Option(False, "--json", help="Machine-readable output."),
 ) -> None:
     """Show the current finding ledger for the project."""
     db, config = _require_db()
     project = _current_project(db)
     entries = compute_project_ledger(db, project.id, config)
-    entries = _filter_ledger(entries, severity, status, scanner)
+    entries = _filter_ledger(entries, severity, status, scanner, rule)
 
     if json_output:
         payload = [
@@ -559,10 +567,15 @@ def export_ai(
     output: Path = typer.Option(None, "--output", help="Output file (default: print to stdout)."),
     json_format: bool = typer.Option(False, "--json", help="Emit the JSON prompt variant."),
     max_findings: int = typer.Option(25, "--max-findings", help="Cap on findings included."),
+    min_severity: str = typer.Option(
+        None, "--min-severity", help="Only include findings at/above this severity."
+    ),
 ) -> None:
     """Generate a review prompt for an external AI or human reviewer (offline)."""
     from patchledger.prompt_generator import build_review_prompt, build_review_prompt_json
 
+    if min_severity:
+        validate_fail_on(min_severity)
     db, config = _require_db()
     project = _current_project(db)
     scans = db.list_scans(project.id)
@@ -572,7 +585,9 @@ def export_ai(
     if json_format:
         content = build_review_prompt_json(ledger, project.name, scans[-1])
     else:
-        content = build_review_prompt(ledger, project.name, scans[-1], max_findings)
+        content = build_review_prompt(
+            ledger, project.name, scans[-1], max_findings, min_severity
+        )
     if output:
         output.write_text(content, encoding="utf-8")
         console.print(f"[green]Review prompt written:[/green] {output}")

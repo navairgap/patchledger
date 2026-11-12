@@ -66,9 +66,25 @@ def _finding_block(index: int, finding: Finding, status: FindingStatus) -> list[
     return lines
 
 
-def select_reviewable(ledger: list[LedgerEntry]) -> list[LedgerEntry]:
-    """Findings worth review: open, reintroduced and inconclusive ones."""
-    return [e for e in ledger if e.status in _REVIEWABLE]
+def select_reviewable(
+    ledger: list[LedgerEntry], min_severity: str | None = None
+) -> list[LedgerEntry]:
+    """Findings worth review: open, reintroduced and inconclusive ones.
+
+    ``min_severity`` (optional) keeps only findings at or above the given
+    normalized severity, for large ledgers where a review should prioritize.
+    """
+    entries = [e for e in ledger if e.status in _REVIEWABLE]
+    if min_severity:
+        order = ["info", "low", "medium", "high", "critical"]
+        floor = order.index(min_severity) if min_severity in order else 0
+        entries = [
+            e
+            for e in entries
+            if e.finding.severity.value in order
+            and order.index(e.finding.severity.value) >= floor
+        ]
+    return entries
 
 
 def build_review_prompt(
@@ -76,9 +92,10 @@ def build_review_prompt(
     project_name: str,
     scan: Scan,
     max_findings: int = 25,
+    min_severity: str | None = None,
 ) -> str:
     """Build the full Markdown review prompt."""
-    entries = select_reviewable(ledger)
+    entries = select_reviewable(ledger, min_severity)
     entries.sort(key=lambda e: -e.finding.score)
     truncated = entries[max_findings:]
     entries = entries[:max_findings]
