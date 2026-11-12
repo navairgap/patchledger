@@ -405,7 +405,7 @@ def _current_project(db: PatchLedgerDB) -> Project:
 @app.command()
 @_run
 def report(
-    fmt: str = typer.Option("html", "--format", help="html | markdown | json"),
+    fmt: str = typer.Option("html", "--format", help="html | markdown | json | sarif"),
     output: Path = typer.Option(None, "--output", help="Output file (default auto-named)."),
     scan_id: str = typer.Option(None, "--scan", help="Scan id (default: latest)."),
 ) -> None:
@@ -452,7 +452,7 @@ def report(
         coverage=build_coverage(scan),
         comparison=comparison,
     )
-    ext = {"html": ".html", "markdown": ".md", "md": ".md", "json": ".json"}[fmt]
+    ext = {"html": ".html", "markdown": ".md", "md": ".md", "json": ".json", "sarif": ".sarif"}[fmt]
     out_path = output if output else Path(f"patchledger-report-{scan.id[:8]}{ext}")
     written = write_report(data, fmt, out_path)
     console.print(f"[green]Report written:[/green] {written}")

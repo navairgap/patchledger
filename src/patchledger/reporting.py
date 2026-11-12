@@ -375,18 +375,22 @@ def render_markdown(data: ReportData) -> str:
 
 
 def write_report(data: ReportData, fmt: str, output: Path) -> Path:
-    """Render a report to a file. fmt: json | markdown | md | html."""
+    """Render a report to a file. fmt: json | markdown | md | html | sarif."""
     from patchledger.html_report import render_html
+    from patchledger.sarif_output import render_sarif
 
     renderers = {
         "json": render_json,
         "markdown": render_markdown,
         "md": render_markdown,
         "html": render_html,
+        "sarif": render_sarif,
     }
     renderer = renderers.get(fmt)
     if renderer is None:
-        raise ReportError(f"Unknown report format '{fmt}'. Supported: json, markdown, html")
+        raise ReportError(
+            f"Unknown report format '{fmt}'. Supported: json, markdown, html, sarif"
+        )
     output = Path(output)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(renderer(data), encoding="utf-8")
