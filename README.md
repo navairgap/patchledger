@@ -6,9 +6,9 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./assets/github-banner-dark.png">
-  <source media="(prefers-color-scheme: light)" srcset="./assets/github-banner-light.png">
-  <img src="./assets/github-banner-dark.png" alt="PatchLedger — Security findings, verified fixed." width="100%">
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/banner-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="./assets/banner-light.png">
+  <img src="./assets/banner-dark.png" alt="PatchLedger — Security findings, verified fixed." width="100%">
 </picture>
 
 ### PatchLedger is an evidence-first security finding and remediation verification platform.
@@ -34,7 +34,7 @@ patchledger init && patchledger scan .
 
 ---
 
-<a href="https://navairgap.github.io/patchledger/"><img src="./assets/github-button-site.png" height="46" alt="Live website"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://navairgap.github.io/patchledger/#report"><img src="./assets/github-button-docs.png" height="46" alt="See an example report"></a>
+<a href="https://navairgap.github.io/patchledger/"><img src="./assets/github-button-site.png" height="46" alt="Live website"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://navairgap.github.io/patchledger/#report"><img src="./assets/button-docs.png" height="46" alt="See an example report"></a>
 
 </div>
 
